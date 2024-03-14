@@ -1,0 +1,212 @@
+[tool.poetry]
+name = "saritasa-sqlalchemy-tools"
+version = "0.1.0"
+description = "Tools for sqlalchemy used by saritasa"
+authors = [
+  "Saritasa <pypi@saritasa.com>",
+]
+maintainers = [
+    "Stanislav Khlud <stanislav.khlud@saritasa.com>",
+]
+homepage = "https://pypi.org/project/saritasa-sqlachemy-tools/"
+repository = "https://github.com/saritasa-nest/saritasa-sqlachemy-tools/"
+keywords = [
+  "python",
+  "sqlachemy"
+]
+license = "MIT"
+readme = "README.md"
+packages = [
+  { include = "saritasa_sqlalchemy_tools" }
+]
+
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "License :: OSI Approved :: MIT License",
+  "Natural Language :: English",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+# The Python SQL Toolkit and Object Relational Mapper
+# https://docs.sqlalchemy.org/
+sqlalchemy = {extras = ["mypy"], version = "<3"}
+# Fast creating of model instances. May be used in tests
+# https://factoryboy.readthedocs.io/en/stable/
+factory-boy  = {version= "<4", optional = true}
+# Data validation using Python type hints
+# https://docs.pydantic.dev/latest/
+pydantic = {version= "<3", optional = true}
+
+[tool.poetry.extras]
+factories = ["factory-boy"]
+auto_schema = ["pydantic"]
+
+[tool.poetry.group.dev.dependencies]
+# Improved REPL
+ipdb = "^0.13.13"
+ipython = "^8.22.1"
+# A framework for managing and maintaining multi-language pre-commit hooks.
+# https://pre-commit.com/
+pre-commit = "^3.6.2"
+# Collection of invoke commands used by Saritasa
+# Invoke is a Python (2.7 and 3.4+) task execution tool & library,
+# drawing inspiration from various sources to arrive at a powerful & clean feature set.
+# http://www.pyinvoke.org/
+# https://github.com/saritasa-nest/saritasa-python-invocations/
+saritasa_invocations = "^1.1.0"
+
+[tool.poetry.group.linters.dependencies]
+# Mypy is a static type checker for Python.
+# https://mypy.readthedocs.io/en/stable/
+mypy = "^1.9.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 79
+indent-width = 4
+target-version = "py311"
+
+[tool.ruff.lint]
+extend-select = [
+  # https://docs.astral.sh/ruff/rules/#pycodestyle-e-w
+  "W",
+  "E",
+  # https://docs.astral.sh/ruff/rules/#mccabe-c90
+  "C90",
+  # https://docs.astral.sh/ruff/rules/#isort-i
+  "I",
+  # https://docs.astral.sh/ruff/rules/#pep8-naming-n
+  "N",
+  # https://docs.astral.sh/ruff/rules/#pydocstyle-d
+  "D",
+  # https://docs.astral.sh/ruff/rules/#pyupgrade-up
+  "UP",
+  # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann
+  "ANN",
+  # https://docs.astral.sh/ruff/rules/#flake8-bandit-s
+  "S",
+  # https://docs.astral.sh/ruff/rules/#flake8-bugbear-b
+  "B",
+  # https://docs.astral.sh/ruff/rules/#flake8-builtins-a
+  "A",
+  # https://docs.astral.sh/ruff/rules/#flake8-commas-com
+  "COM",
+  # https://docs.astral.sh/ruff/rules/#flake8-comprehensions-c4
+  "C4",
+  # https://docs.astral.sh/ruff/rules/#flake8-datetimez-dtz
+  "DTZ",
+  # https://docs.astral.sh/ruff/rules/#flake8-debugger-t10
+  "T10",
+  # https://docs.astral.sh/ruff/rules/#flake8-django-dj
+  "DJ",
+  # https://docs.astral.sh/ruff/rules/#flake8-print-t20
+  "T20",
+  # https://docs.astral.sh/ruff/rules/#flake8-simplify-sim
+  "PT",
+  # https://docs.astral.sh/ruff/rules/#flake8-simplify-sim
+  "SIM",
+  # https://docs.astral.sh/ruff/rules/#flake8-simplify-sim
+  "PTH",
+  # https://docs.astral.sh/ruff/rules/#flake8-todos-td
+  "TD",
+  # https://docs.astral.sh/ruff/rules/#eradicate-era
+  "ERA",
+  # https://docs.astral.sh/ruff/rules/#ruff-specific-rules-ruf
+  "RUF"
+]
+ignore = [
+    # https://docs.astral.sh/ruff/rules/ANN101
+  "ANN101",
+  # https://docs.astral.sh/ruff/rules/ANN102
+  "ANN102",
+  # https://docs.astral.sh/ruff/rules/ANN401
+  "ANN401",
+  # https://docs.astral.sh/ruff/rules/ANN003
+  "ANN003",
+  # https://docs.astral.sh/ruff/rules/D100
+  "D100",
+  # https://docs.astral.sh/ruff/rules/D104
+  "D104",
+  # https://docs.astral.sh/ruff/rules/D106
+  "D106",
+  # https://docs.astral.sh/ruff/rules/D107
+  "D107",
+]
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = [
+  # https://docs.astral.sh/ruff/rules/F401
+  "F401",
+]
+"**/tests/*" = [
+  # https://docs.astral.sh/ruff/rules/S101
+  "S101",
+  # https://docs.astral.sh/ruff/rules/S106
+  "S106",
+  # https://docs.astral.sh/ruff/rules/S311
+  "S311",
+]
+"**/test_*" = [
+  # https://docs.astral.sh/ruff/rules/ANN201
+  "ANN201",
+]
+[tool.ruff.lint.isort]
+force-wrap-aliases = true
+split-on-trailing-comma = true
+section-order = [
+    "future",
+    "standard-library",
+    "sqlachemy",
+    "third-party",
+    "first-party",
+    "local-folder",
+]
+[tool.ruff.lint.isort.sections]
+sqlachemy = ["sqlachemy"]
+
+[tool.ruff.lint.flake8-pytest-style]
+fixture-parentheses = true
+parametrize-names-type = "list"
+parametrize-values-type = "list"
+parametrize-values-row-type = "list"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.mypy]
+plugins = [
+  "sqlalchemy.ext.mypy.plugin",
+]
+# https://mypy.readthedocs.io/en/stable/running_mypy.html#missing-imports
+ignore_missing_imports = true
+strict = false
+warn_no_return = false
+check_untyped_defs = true
+disallow_any_generics = true
+exclude = [
+  "venv",
+  ".venv",
+]
+
+[[tool.mypy.overrides]]
+module = "tests/*"
+disable_error_code = [
+  "attr-defined",
+  "operator",
+]
+
+[tool.pyright]
+ignore = [
+  # Disabled for tests because of dynamic nature of pytest
+  "**/*test_*.py",
+  "invocations/**"
+]
