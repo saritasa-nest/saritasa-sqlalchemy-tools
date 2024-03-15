@@ -1,3 +1,4 @@
+# pragma: no cover
 import collections.abc
 import contextlib
 import typing

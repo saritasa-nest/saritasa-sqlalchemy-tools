@@ -7,6 +7,7 @@ import typing
 import pydantic
 import pydantic_core
 import sqlalchemy.dialects.postgresql.ranges
+import sqlalchemy.orm
 
 from . import models
 
@@ -148,7 +149,7 @@ class ModelAutoSchema:
                         pydantic.field_validator(field)(validator)
                     )
                 continue
-            if isinstance(field, tuple):
+            if isinstance(field, tuple) and len(field) == 2:
                 field_name, field_type = field
                 generated_fields[field_name] = (
                     cls._generate_field_with_custom_type(
@@ -159,7 +160,7 @@ class ModelAutoSchema:
                     )
                 )
                 for index, validator in enumerate(
-                    extra_fields_validators.get(field, ()),
+                    extra_fields_validators.get(field_name, ()),
                 ):
                     validators[f"{field_name}_validator_{index}"] = (
                         pydantic.field_validator(field_name)(validator)
@@ -197,7 +198,14 @@ class ModelAutoSchema:
                 model_attribute,
                 extra_field_config,
             )
-        if model_attribute.type.__class__ not in types_mapping:
+        if isinstance(model_attribute.property, sqlalchemy.orm.Relationship):
+            raise UnableProcessTypeError(
+                "Schema generation is not supported for relationship "
+                f"fields({field}), please use auto-schema or pydantic class",
+            )
+        if (
+            model_attribute.type.__class__ not in types_mapping
+        ):  # pragma: no cover
             raise UnableProcessTypeError(
                 "Can't generate generate type for"
                 f" {model_attribute.type.__class__}"
@@ -443,7 +451,7 @@ class ModelAutoSchema:
     ) -> PydanticFieldConfig:
         """Generate enum field."""
         if model_type.enum_class is None:  # type: ignore
-            raise UnableToExtractEnumClassError(
+            raise UnableToExtractEnumClassError(  # pragma: no cover
                 f"Can't extract enum for {field} in {model}",
             )
         return (
@@ -517,7 +525,11 @@ class ModelAutoSchema:
             model_type.item_type,  # type: ignore
             extra_field_config,
         )
-        return list[list_type], pydantic_core.PydanticUndefined  # type: ignore
+        return (
+            list[list_type] | None  # type: ignore
+            if model_attribute.nullable
+            else list[list_type]  # type: ignore
+        ), pydantic_core.PydanticUndefined
 
 
 ModelAutoSchemaT = typing.TypeVar(

@@ -48,7 +48,7 @@ class AsyncSQLAlchemyModelFactory(
             None,
         )
         if not repository_class:
-            raise ValueError("Repository class in not set in Meta class")
+            raise ValueError("Repository class is not set in Meta class")
         repository = repository_class(db_session=session)
 
         pk_attr: str = instance.pk_field
@@ -61,7 +61,9 @@ class AsyncSQLAlchemyModelFactory(
             )
         ).first()
         if not instance_from_db:
-            raise ValueError("Created instance wasn't found in database")
+            raise ValueError(  # pragma: no cover
+                "Created instance wasn't found in database",
+            )
         return instance_from_db
 
     @classmethod
@@ -87,23 +89,40 @@ class AsyncSQLAlchemyModelFactory(
         cls,
         session: session.Session,
         passed_fields: collections.abc.Sequence[str],
-    ) -> dict[str, models.BaseModel]:
+    ) -> dict[str, models.BaseModel | list[models.BaseModel]]:
         """Generate objects from sub factories."""
-        sub_factories_map: dict[str, str] = getattr(
+        sub_factories_map: dict[str, str | tuple[str, int]] = getattr(
             cls._meta,
             "sub_factories",
             {},
         )
-        generated_instances: dict[str, models.BaseModel] = {}
+        generated_instances: dict[
+            str,
+            models.BaseModel | list[models.BaseModel],
+        ] = {}
         for field, sub_factory_path in sub_factories_map.items():
             if field in passed_fields or f"{field}_id" in passed_fields:
                 continue
-            *factory_module, sub_factory_name = sub_factory_path.split(".")
-            sub_factory: typing.Self = getattr(
-                importlib.import_module(".".join(factory_module)),
-                sub_factory_name,
-            )
-            generated_instances[field] = await sub_factory.create_async(
-                session=session,
-            )
+            if isinstance(sub_factory_path, str):
+                *factory_module, sub_factory_name = sub_factory_path.split(".")
+                sub_factory = getattr(
+                    importlib.import_module(".".join(factory_module)),
+                    sub_factory_name,
+                )
+                generated_instances[field] = await sub_factory.create_async(
+                    session=session,
+                )
+            else:
+                sub_factory_path, size = sub_factory_path
+                *factory_module, sub_factory_name = sub_factory_path.split(".")
+                sub_factory = getattr(
+                    importlib.import_module(".".join(factory_module)),
+                    sub_factory_name,
+                )
+                generated_instances[
+                    field
+                ] = await sub_factory.create_batch_async(
+                    session=session,
+                    size=size,
+                )
         return generated_instances

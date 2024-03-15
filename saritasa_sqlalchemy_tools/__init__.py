@@ -32,7 +32,7 @@ from .repositories import (
     Filter,
     LazyLoaded,
     LazyLoadedSequence,
-    OrderingClausesT,
+    OrderingClauses,
     OrderingEnum,
     OrderingEnumMeta,
     SQLWhereFilter,
