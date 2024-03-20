@@ -1,5 +1,5 @@
 version: '3.7'
-name: "saritasa-sqlachemy-tools"
+name: "saritasa-sqlalchemy-tools"
 
 services:
   postgres:

@@ -51,3 +51,11 @@ repos:
         pass_filenames: false
         types: [ file ]
         stages: [ push ]
+
+      - id: pytest
+        name: Run pytest
+        entry: inv pytest.run
+        language: system
+        pass_filenames: false
+        types: [ file ]
+        stages: [ push ]

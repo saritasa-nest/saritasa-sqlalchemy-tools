@@ -25,13 +25,13 @@ class OrderingEnum(enum.StrEnum, metaclass=OrderingEnumMeta):
     """Representation of ordering fields."""
 
     @property
-    def db_clause(self) -> str | sqlalchemy.ColumnExpressionArgument[str]:
+    def sql_clause(self) -> "SQLOrderingClause":
         """Convert ordering value to sqlalchemy ordering clause."""
         if self.startswith("-"):
             return sqlalchemy.desc(self[1:])
         return self
 
 
-OrderingClausesT: typing.TypeAlias = collections.abc.Sequence[
-    str | sqlalchemy.ColumnExpressionArgument[str] | OrderingEnum
-]
+SQLOrderingClause = str | sqlalchemy.ColumnExpressionArgument[str]
+OrderingClause = SQLOrderingClause | OrderingEnum
+OrderingClauses: typing.TypeAlias = collections.abc.Sequence[OrderingClause]

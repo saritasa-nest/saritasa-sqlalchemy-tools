@@ -38,7 +38,7 @@ FilterType: typing.TypeAlias = _FilterType[typing.Any]
 class Filter:
     """Define filter value."""
 
-    api_filter: str
+    field: str
     value: FilterType
 
     def transform_filter(
@@ -46,7 +46,7 @@ class Filter:
         model: type[models.BaseModelT],
     ) -> SQLWhereFilter:
         """Transform filter valid for sqlalchemy."""
-        field_name, filter_arg = self.api_filter.split("__")
+        field_name, filter_arg = self.field.split("__")
         if field_name in model.m2m_filters:
             return self.transform_m2m_filter(
                 field_name=field_name,
@@ -114,20 +114,6 @@ class Filter:
         filter_operator = getattr(field, filter_args_mapping[filter_arg])(
             value,
         )
-        if (
-            filter_arg
-            in (
-                "gt",
-                "gte",
-                "lt",
-                "lte",
-            )
-            and field.nullable
-        ):
-            filter_operator = sqlalchemy.or_(
-                filter_operator,
-                field.is_(None),
-            )
         return filter_operator
 
 

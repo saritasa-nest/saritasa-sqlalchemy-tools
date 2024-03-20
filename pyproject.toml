@@ -64,6 +64,25 @@ saritasa_invocations = "^1.1.0"
 # https://mypy.readthedocs.io/en/stable/
 mypy = "^1.9.0"
 
+[tool.poetry.group.test.dependencies]
+pytest = "^8.1.1"
+# pytest-asyncio is a pytest plugin. It facilitates testing of code that
+# uses the asyncio library.
+# https://pytest-asyncio.readthedocs.io/en/latest/
+pytest-asyncio = "^0.21.1"
+# Database testing fixtures using the SQLAlchemy asyncio API
+# https://pypi.org/project/pytest-async-sqlalchemy/
+pytest-async-sqlalchemy = "^0.2.0"
+# To prettify pytest output
+pytest-sugar = "^1.0.0"
+# Coverage plugin for pytest.
+# https://github.com/pytest-dev/pytest-cov
+pytest-cov = "^4.1.0"
+# asyncpg is a database interface library designed specifically for PostgreSQL
+# and Python/asyncio.
+# https://magicstack.github.io/asyncpg/current/
+asyncpg = "^0.28.0"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
@@ -171,7 +190,7 @@ section-order = [
 sqlachemy = ["sqlachemy"]
 
 [tool.ruff.lint.flake8-pytest-style]
-fixture-parentheses = true
+fixture-parentheses = false
 parametrize-names-type = "list"
 parametrize-values-type = "list"
 parametrize-values-row-type = "list"
@@ -210,3 +229,33 @@ ignore = [
   "**/*test_*.py",
   "invocations/**"
 ]
+
+[tool.pytest.ini_options]
+# --capture=no
+#   allow use of ipdb during tests
+# --ff
+#   run last failed tests first
+addopts = [
+    "--capture=no",
+    "--ff",
+    "--cov=saritasa_sqlalchemy_tools",
+    "--cov-report=html",
+]
+# skip all files inside following dirs
+norecursedirs = [
+    "venv",
+    ".venv",
+]
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+omit = [
+  "saritasa_sqlalchemy_tools/session.py",
+]
+
+# https://docformatter.readthedocs.io/en/latest/configuration.html#
+[tool.docformatter]
+wrap-descriptions=0
+in-place=true
+blank=true
+black=true

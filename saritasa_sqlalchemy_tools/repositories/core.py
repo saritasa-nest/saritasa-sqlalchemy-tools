@@ -36,22 +36,18 @@ class BaseRepository(
         self,
         db_session: sqlalchemy.ext.asyncio.AsyncSession,
     ) -> None:
-        self._db_session = db_session
+        self.db_session = db_session
 
     def init_other(
         self,
         repository_class: type[BaseRepositoryT],
     ) -> BaseRepositoryT:
         """Init other repo from current."""
-        return repository_class(db_session=self._db_session)
-
-    async def commit(self) -> None:
-        """Commit transaction."""
-        await self._db_session.commit()
+        return repository_class(db_session=self.db_session)
 
     async def flush(self) -> None:
         """Perform changes to database."""
-        await self._db_session.flush()
+        await self.db_session.flush()
 
     async def refresh(
         self,
@@ -59,7 +55,7 @@ class BaseRepository(
         attribute_names: collections.abc.Sequence[str] | None = None,
     ) -> None:
         """Refresh instance."""
-        await self._db_session.refresh(
+        await self.db_session.refresh(
             instance=instance,
             attribute_names=attribute_names,
         )
@@ -71,11 +67,11 @@ class BaseRepository(
         fetched from db again.
 
         """
-        self._db_session.expire(instance)
+        self.db_session.expire(instance)
 
     async def get(self, pk: int | str) -> models.BaseModelT | None:
         """Return entry from DB by primary key."""
-        return await self._db_session.get(self.model, pk)
+        return await self.db_session.get(self.model, pk)
 
     async def save(
         self,
@@ -84,7 +80,7 @@ class BaseRepository(
         attribute_names: collections.abc.Sequence[str] | None = None,
     ) -> models.BaseModelT:
         """Save model instance into db."""
-        self._db_session.add(instance=instance)
+        self.db_session.add(instance=instance)
         await self.flush()
         if refresh:
             await self.refresh(instance, attribute_names)
@@ -92,7 +88,7 @@ class BaseRepository(
 
     async def delete(self, instance: models.BaseModelT) -> None:
         """Delete model instance into db."""
-        await self._db_session.delete(instance=instance)
+        await self.db_session.delete(instance=instance)
         await self.flush()
 
     async def delete_batch(
@@ -101,7 +97,7 @@ class BaseRepository(
         **filters_by: typing.Any,
     ) -> None:
         """Delete batch of objects from db."""
-        await self._db_session.execute(
+        await self.db_session.execute(
             statement=(
                 sqlalchemy.sql.delete(self.model)
                 .where(*self.process_where_filters(*where))
@@ -141,7 +137,7 @@ class BaseRepository(
         exclude_fields: collections.abc.Sequence[str] = (),
     ) -> list[models.BaseModelT]:
         """Create batch of objects in db."""
-        if not objects:
+        if not objects:  # pragma: no cover
             return []
 
         objects_as_dict = self.objects_as_dict(
@@ -150,7 +146,7 @@ class BaseRepository(
                 exclude_fields or self.default_exclude_bulk_create_fields
             ),
         )
-        created_objects = await self._db_session.scalars(
+        created_objects = await self.db_session.scalars(
             sqlalchemy.sql.insert(self.model)
             .returning(self.model)
             .values(objects_as_dict),
@@ -164,7 +160,7 @@ class BaseRepository(
         exclude_fields: collections.abc.Sequence[str] = (),
     ) -> None:
         """Update batch of objects in db."""
-        if not objects:
+        if not objects:  # pragma: no cover
             return
 
         objects_as_dict = self.objects_as_dict(
@@ -173,7 +169,7 @@ class BaseRepository(
                 exclude_fields or self.default_exclude_bulk_update_fields
             ),
         )
-        await self._db_session.execute(
+        await self.db_session.execute(
             sqlalchemy.sql.update(self.model),
             objects_as_dict,
         )
@@ -208,7 +204,7 @@ class BaseRepository(
     def get_filter_statement(
         self,
         statement: models.SelectStatement[models.BaseModelT] | None = None,
-        *where_filters: filters.WhereFilter,
+        *where: filters.WhereFilter,
         **filters_by: typing.Any,
     ) -> models.SelectStatement[models.BaseModelT]:
         """Get statement with filtering."""
@@ -217,17 +213,17 @@ class BaseRepository(
         else:
             select_statement = self.select_statement
         return select_statement.where(
-            *self.process_where_filters(*where_filters),
+            *self.process_where_filters(*where),
         ).filter_by(**filters_by)
 
     @classmethod
     def process_where_filters(
         cls,
-        *where_filters: filters.WhereFilter,
+        *where: filters.WhereFilter,
     ) -> collections.abc.Sequence[filters.SQLWhereFilter]:
         """Process where filters."""
         processed_where_filters: list[filters.SQLWhereFilter] = []
-        for where_filter in where_filters:
+        for where_filter in where:
             if isinstance(where_filter, filters.Filter):
                 processed_where_filters.append(
                     where_filter.transform_filter(cls.model),  # type: ignore
@@ -239,22 +235,30 @@ class BaseRepository(
     def get_order_statement(
         self,
         statement: models.SelectStatement[models.BaseModelT] | None = None,
-        *clauses: sqlalchemy.ColumnExpressionArgument[str] | str,
+        *clauses: ordering.OrderingClause,
     ) -> models.SelectStatement[models.BaseModelT]:
         """Get statement with ordering."""
         if statement is not None:
             select_statement = statement
         else:
             select_statement = self.select_statement
-        ordering_clauses = [
-            (
-                clause.db_clause
-                if isinstance(clause, ordering.OrderingEnum)
-                else clause
-            )
-            for clause in clauses
-        ]
-        return select_statement.order_by(*ordering_clauses)
+        return select_statement.order_by(
+            *self.process_ordering_clauses(*clauses),
+        )
+
+    @classmethod
+    def process_ordering_clauses(
+        cls,
+        *clauses: ordering.OrderingClause,
+    ) -> collections.abc.Sequence[ordering.SQLOrderingClause]:
+        """Process ordering clauses."""
+        processed_ordering_clauses: list[ordering.SQLOrderingClause] = []
+        for clause in clauses:
+            if isinstance(clause, ordering.OrderingEnum):
+                processed_ordering_clauses.append(clause.sql_clause)
+            else:
+                processed_ordering_clauses.append(clause)
+        return processed_ordering_clauses
 
     def get_pagination_statement(
         self,
@@ -323,7 +327,7 @@ class BaseRepository(
         joined_load: types.LazyLoadedSequence = (),
         select_in_load: types.LazyLoadedSequence = (),
         annotations: types.AnnotationSequence = (),
-        clauses: ordering.OrderingClausesT = (),
+        ordering_clauses: ordering.OrderingClauses = (),
         where: filters.WhereFilters = (),
         **filters_by: typing.Any,
     ) -> models.SelectStatement[models.BaseModelT]:
@@ -342,7 +346,7 @@ class BaseRepository(
         )
         statement = self.get_order_statement(
             statement,
-            *clauses,
+            *ordering_clauses,
         )
         statement = self.get_filter_statement(
             statement,
@@ -364,12 +368,12 @@ class BaseRepository(
         joined_load: types.LazyLoadedSequence = (),
         select_in_load: types.LazyLoadedSequence = (),
         annotations: types.AnnotationSequence = (),
-        clauses: ordering.OrderingClausesT = (),
+        ordering_clauses: ordering.OrderingClauses = (),
         where: filters.WhereFilters = (),
         **filters_by: typing.Any,
     ) -> sqlalchemy.ScalarResult[models.BaseModelT]:
         """Fetch entries."""
-        return await self._db_session.scalars(
+        return await self.db_session.scalars(
             statement=self.get_fetch_statement(
                 statement=statement,
                 offset=offset,
@@ -377,7 +381,7 @@ class BaseRepository(
                 joined_load=joined_load,
                 select_in_load=select_in_load,
                 annotations=annotations,
-                clauses=clauses,
+                ordering_clauses=ordering_clauses,
                 where=where,
                 **filters_by,
             ),
@@ -390,7 +394,7 @@ class BaseRepository(
     ) -> int:
         """Get count of entries."""
         return (
-            await self._db_session.scalar(
+            await self.db_session.scalar(
                 sqlalchemy.select(sqlalchemy.func.count())
                 .select_from(self.model)
                 .where(*self.process_where_filters(*where))
@@ -405,7 +409,7 @@ class BaseRepository(
     ) -> bool:
         """Check existence of entries."""
         return (
-            await self._db_session.scalar(
+            await self.db_session.scalar(
                 sqlalchemy.select(
                     sqlalchemy.sql.exists(
                         self.select_statement.where(
