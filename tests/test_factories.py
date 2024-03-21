@@ -47,15 +47,13 @@ async def test_factory_generation_sub_factories(
 
     """
     instance = await factories.TestModelFactory.create_async(db_session)
-    instance_created = (
-        await repository.fetch(
-            id=instance.id,
-            select_in_load=(
-                models.TestModel.related_model,
-                models.TestModel.related_models,
-            ),
-        )
-    ).first()
+    instance_created = await repository.fetch_first(
+        id=instance.id,
+        select_in_load=(
+            models.TestModel.related_model,
+            models.TestModel.related_models,
+        ),
+    )
     assert instance_created
     assert instance_created.related_model_id
     assert instance_created.related_model

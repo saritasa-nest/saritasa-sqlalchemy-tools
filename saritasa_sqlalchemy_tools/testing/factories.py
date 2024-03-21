@@ -53,13 +53,11 @@ class AsyncSQLAlchemyModelFactory(
 
         pk_attr: str = instance.pk_field
         await repository.save(instance=instance)
-        instance_from_db = (
-            await repository.fetch(
-                **{
-                    pk_attr: getattr(instance, pk_attr),
-                },
-            )
-        ).first()
+        instance_from_db = await repository.fetch_first(
+            **{
+                pk_attr: getattr(instance, pk_attr),
+            },
+        )
         if not instance_from_db:
             raise ValueError(  # pragma: no cover
                 "Created instance wasn't found in database",

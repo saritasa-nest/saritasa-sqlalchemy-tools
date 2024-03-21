@@ -181,16 +181,14 @@ async def test_auto_schema_related_field_with_schema(
             )
 
     schema = AutoSchema.get_schema()
-    instance = (
-        await repository.fetch(
-            id=test_model.id,
-            select_in_load=(
-                models.TestModel.related_model,
-                models.TestModel.related_model_nullable,
-                models.TestModel.related_models,
-            ),
-        )
-    ).first()
+    instance = await repository.fetch_first(
+        id=test_model.id,
+        select_in_load=(
+            models.TestModel.related_model,
+            models.TestModel.related_model_nullable,
+            models.TestModel.related_models,
+        ),
+    )
     model = schema.model_validate(instance)
     isinstance(model.related_models, list)
     for field in RelatedAutoSchema.Meta.fields:

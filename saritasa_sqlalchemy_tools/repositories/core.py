@@ -69,10 +69,6 @@ class BaseRepository(
         """
         self.db_session.expire(instance)
 
-    async def get(self, pk: int | str) -> models.BaseModelT | None:
-        """Return entry from DB by primary key."""
-        return await self.db_session.get(self.model, pk)
-
     async def save(
         self,
         instance: models.BaseModelT,
@@ -363,6 +359,7 @@ class BaseRepository(
     async def fetch(
         self,
         statement: models.SelectStatement[models.BaseModelT] | None = None,
+        unique: bool = True,
         offset: int | None = None,
         limit: int | None = None,
         joined_load: types.LazyLoadedSequence = (),
@@ -373,7 +370,7 @@ class BaseRepository(
         **filters_by: typing.Any,
     ) -> sqlalchemy.ScalarResult[models.BaseModelT]:
         """Fetch entries."""
-        return await self.db_session.scalars(
+        scalar_result = await self.db_session.scalars(
             statement=self.get_fetch_statement(
                 statement=statement,
                 offset=offset,
@@ -386,6 +383,67 @@ class BaseRepository(
                 **filters_by,
             ),
         )
+        if unique:
+            scalar_result = scalar_result.unique()
+        return scalar_result
+
+    async def fetch_all(
+        self,
+        statement: models.SelectStatement[models.BaseModelT] | None = None,
+        unique: bool = True,
+        offset: int | None = None,
+        limit: int | None = None,
+        joined_load: types.LazyLoadedSequence = (),
+        select_in_load: types.LazyLoadedSequence = (),
+        annotations: types.AnnotationSequence = (),
+        ordering_clauses: ordering.OrderingClauses = (),
+        where: filters.WhereFilters = (),
+        **filters_by: typing.Any,
+    ) -> collections.abc.Sequence[models.BaseModelT]:
+        """Fetch all matching entries."""
+        return (
+            await self.fetch(
+                statement=statement,
+                unique=unique,
+                offset=offset,
+                limit=limit,
+                joined_load=joined_load,
+                select_in_load=select_in_load,
+                annotations=annotations,
+                ordering_clauses=ordering_clauses,
+                where=where,
+                **filters_by,
+            )
+        ).all()
+
+    async def fetch_first(
+        self,
+        statement: models.SelectStatement[models.BaseModelT] | None = None,
+        unique: bool = True,
+        offset: int | None = None,
+        limit: int | None = None,
+        joined_load: types.LazyLoadedSequence = (),
+        select_in_load: types.LazyLoadedSequence = (),
+        annotations: types.AnnotationSequence = (),
+        ordering_clauses: ordering.OrderingClauses = (),
+        where: filters.WhereFilters = (),
+        **filters_by: typing.Any,
+    ) -> models.BaseModelT | None:
+        """Get first matching instance."""
+        return (
+            await self.fetch(
+                statement=statement,
+                unique=unique,
+                offset=offset,
+                limit=limit,
+                joined_load=joined_load,
+                select_in_load=select_in_load,
+                annotations=annotations,
+                ordering_clauses=ordering_clauses,
+                where=where,
+                **filters_by,
+            )
+        ).first()
 
     async def count(
         self,

@@ -23,8 +23,8 @@ async def test_soft_delete(
 ) -> None:
     """Test soft deletion, model instance should be still present in db."""
     await soft_delete_repository.delete(soft_delete_test_model)
-    soft_deleted_object = await soft_delete_repository.get(
-        soft_delete_test_model.id,
+    soft_deleted_object = await soft_delete_repository.fetch_first(
+        id=soft_delete_test_model.id,
     )
     assert soft_deleted_object
     assert soft_deleted_object.deleted
@@ -36,7 +36,9 @@ async def test_force_soft_delete(
 ) -> None:
     """Test force soft delete."""
     await soft_delete_repository.force_delete(soft_delete_test_model)
-    assert not await soft_delete_repository.get(soft_delete_test_model.id)
+    assert not await soft_delete_repository.fetch_first(
+        id=soft_delete_test_model.id,
+    )
 
 
 async def test_insert_batch(
@@ -68,7 +70,7 @@ async def test_update_batch(
     for test_model in test_model_list:
         pk = test_model.id
         repository.expire(test_model)
-        test_model = await repository.get(pk)  # type: ignore
+        test_model = await repository.fetch_first(id=pk)  # type: ignore
         assert test_model.related_model_id == related_model.id
 
 
@@ -91,7 +93,7 @@ async def test_save(
         related_model_id=related_model.id,
     )
     new_test_model = await repository.save(new_test_model, refresh=True)
-    assert (await repository.fetch(id=new_test_model.id)).first()
+    assert await repository.fetch_first(id=new_test_model.id)
 
 
 async def test_expire(
@@ -126,13 +128,9 @@ async def test_ordering(
             None,
             *["text"],
         )
-        models_from_db = (
-            await repository.fetch(statement=select_statement)
-        ).all()
+        models_from_db = await repository.fetch_all(statement=select_statement)
     else:
-        models_from_db = (
-            await repository.fetch(ordering_clauses=["text"])
-        ).all()
+        models_from_db = await repository.fetch_all(ordering_clauses=["text"])
     for actual, expected in zip(models_from_db, ordered_models, strict=False):
         assert actual.id == expected.id
 
@@ -151,9 +149,9 @@ async def test_ordering_with_enum(
     class OrderingEnum(saritasa_sqlalchemy_tools.OrderingEnum):
         text = "text"
 
-    models_from_db = (
-        await repository.fetch(ordering_clauses=[OrderingEnum.text_desc])
-    ).all()
+    models_from_db = await repository.fetch_all(
+        ordering_clauses=[OrderingEnum.text_desc],
+    )
     for actual, expected in zip(models_from_db, ordered_models, strict=False):
         assert actual.id == expected.id
 
@@ -181,17 +179,14 @@ async def test_pagination(
     }
     if reuse_select_statement:
         select_statement = repository.get_pagination_statement(**args)  # type: ignore
-        models_from_db = (
-            await repository.fetch(
-                statement=select_statement,
-                ordering_clauses=["id"],
-            )
-        ).all()
+        models_from_db = await repository.fetch_all(
+            statement=select_statement,
+            ordering_clauses=["id"],
+        )
     else:
         models_from_db = (
-            await repository.fetch(ordering_clauses=["id"], **args)  # type: ignore
-        ).all()
-
+            await repository.fetch_all(ordering_clauses=["id"], **args)  # type: ignore
+        )
     assert models_from_db[0].id == ordered_models[1].id
     assert models_from_db[1].id == ordered_models[2].id
 
@@ -245,14 +240,12 @@ async def test_prefetch(
             repository,
             f"get_{prefetch_type}_statement",
         )(None, *targets)
-        instance = (
-            await repository.fetch(
-                statement=select_statement,
-                id=test_model.id,
-            )
-        ).first()
+        instance = await repository.fetch_first(
+            statement=select_statement,
+            id=test_model.id,
+        )
     else:
-        instance = (await repository.fetch(**args)).first()  # type: ignore
+        instance = await repository.fetch_first(**args)  # type: ignore
     assert instance
     assert instance.related_model
     assert not instance.related_model_nullable
@@ -294,19 +287,15 @@ async def test_filter_in(
             None,
             *args["where"],
         )
-        instances = (
-            await repository.fetch(
-                statement=select_statement,
-                ordering_clauses=["id"],
-            )
-        ).all()
+        instances = await repository.fetch_all(
+            statement=select_statement,
+            ordering_clauses=["id"],
+        )
     else:
-        instances = (
-            await repository.fetch(
-                **args,  # type: ignore
-                ordering_clauses=["id"],
-            )
-        ).all()
+        instances = await repository.fetch_all(
+            **args,  # type: ignore
+            ordering_clauses=["id"],
+        )
     assert instances[0].id == filtered_models[0].id
     assert instances[1].id == filtered_models[1].id
 
@@ -339,19 +328,15 @@ async def test_filter_gte(
             None,
             *args["where"],
         )
-        instances = (
-            await repository.fetch(
-                statement=select_statement,
-                ordering_clauses=["id"],
-            )
-        ).all()
+        instances = await repository.fetch_all(
+            statement=select_statement,
+            ordering_clauses=["id"],
+        )
     else:
-        instances = (
-            await repository.fetch(
-                **args,  # type: ignore
-                ordering_clauses=["id"],
-            )
-        ).all()
+        instances = await repository.fetch_all(
+            **args,  # type: ignore
+            ordering_clauses=["id"],
+        )
     assert len(instances) == 1
     assert instances[0].number == max_num
 
@@ -393,26 +378,14 @@ async def test_filter_m2m(
             None,
             *args["where"],
         )
-        instances = (
-            (
-                await repository.fetch(
-                    statement=select_statement,
-                    ordering_clauses=["id"],
-                )
-            )
-            .unique()
-            .all()
+        instances = await repository.fetch_all(
+            statement=select_statement,
+            ordering_clauses=["id"],
         )
     else:
-        instances = (
-            (
-                await repository.fetch(
-                    **args,  # type: ignore
-                    ordering_clauses=["id"],
-                )
-            )
-            .unique()
-            .all()
+        instances = await repository.fetch_all(
+            **args,  # type: ignore
+            ordering_clauses=["id"],
         )
     assert len(instances) == 1
     assert instances[0].id == test_model.id
@@ -424,24 +397,18 @@ async def test_search_filter(
 ) -> None:
     """Test search filter."""
     search_text = test_model_list[0].text
-    instances = (
-        (
-            await repository.fetch(
-                where=[
-                    saritasa_sqlalchemy_tools.transform_search_filter(
-                        models.TestModel,
-                        search_fields=[
-                            "text",
-                            "id",
-                        ],
-                        value=search_text,
-                    ),
+    instances = await repository.fetch_all(
+        where=[
+            saritasa_sqlalchemy_tools.transform_search_filter(
+                models.TestModel,
+                search_fields=[
+                    "text",
+                    "id",
                 ],
-                ordering_clauses=["id"],
-            )
-        )
-        .unique()
-        .all()
+                value=search_text,
+            ),
+        ],
+        ordering_clauses=["id"],
     )
     assert len(instances) == 1
     assert instances[0].id == test_model_list[0].id
@@ -471,19 +438,15 @@ async def test_annotation(
             None,
             *annotations,
         )
-        instance = (
-            await repository.fetch(
-                statement=select_statement,
-                id=test_model.id,
-            )
-        ).first()
+        instance = await repository.fetch_first(
+            statement=select_statement,
+            id=test_model.id,
+        )
     else:
-        instance = (
-            await repository.fetch(
-                id=test_model.id,
-                annotations=annotations,
-            )
-        ).first()
+        instance = await repository.fetch_first(
+            id=test_model.id,
+            annotations=annotations,
+        )
     assert instance
     assert (
         instance.related_models_count
@@ -498,26 +461,23 @@ async def test_annotation_query(
     repository: repositories.TestModelRepository,
 ) -> None:
     """Test annotations loading when using dynamic queries."""
-    instance = (
-        await repository.fetch(
-            id=test_model.id,
-            annotations=(
-                (
-                    models.TestModel.related_models_count_query,
-                    sqlalchemy.select(
-                        sqlalchemy.func.count(models.RelatedModel.id),
-                    )
-                    .where(
-                        models.RelatedModel.test_model_id
-                        == models.TestModel.id,
-                    )
-                    .correlate_except(models.RelatedModel)
-                    .scalar_subquery(),
-                ),
+    instance = await repository.fetch_first(
+        id=test_model.id,
+        annotations=(
+            (
+                models.TestModel.related_models_count_query,
+                sqlalchemy.select(
+                    sqlalchemy.func.count(models.RelatedModel.id),
+                )
+                .where(
+                    models.RelatedModel.test_model_id == models.TestModel.id,
+                )
+                .correlate_except(models.RelatedModel)
+                .scalar_subquery(),
             ),
-            select_in_load=(models.TestModel.related_models,),
-        )
-    ).first()
+        ),
+        select_in_load=(models.TestModel.related_models,),
+    )
     assert instance
     assert instance.related_models_count_query == len(
         test_model.related_models,
