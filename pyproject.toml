@@ -81,7 +81,7 @@ pytest-cov = "^4.1.0"
 # asyncpg is a database interface library designed specifically for PostgreSQL
 # and Python/asyncio.
 # https://magicstack.github.io/asyncpg/current/
-asyncpg = "^0.28.0"
+asyncpg = "^0.29.0"
 
 [build-system]
 requires = ["poetry-core"]
