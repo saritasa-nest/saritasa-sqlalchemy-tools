@@ -6,7 +6,12 @@ from .filters import (
     WhereFilters,
     transform_search_filter,
 )
-from .ordering import OrderingClauses, OrderingEnum, OrderingEnumMeta
+from .ordering import (
+    OrderingClause,
+    OrderingClauses,
+    OrderingEnum,
+    OrderingEnumMeta,
+)
 from .types import (
     Annotation,
     AnnotationSequence,

@@ -32,6 +32,7 @@ from .repositories import (
     Filter,
     LazyLoaded,
     LazyLoadedSequence,
+    OrderingClause,
     OrderingClauses,
     OrderingEnum,
     OrderingEnumMeta,
