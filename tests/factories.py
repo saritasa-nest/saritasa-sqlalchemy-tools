@@ -43,6 +43,7 @@ class TestModelFactory(
     date_time = factory.Faker("date_time")
     date = factory.Faker("date_between")
     timedelta = factory.Faker("time_delta")
+    json_field = factory.Faker("pydict", allowed_types=[str, int, float])
 
     class Meta:
         model = models.TestModel
@@ -90,6 +91,7 @@ class SoftDeleteTestModelFactory(
     date_time = factory.Faker("date_time")
     date = factory.Faker("date_between")
     timedelta = factory.Faker("time_delta")
+    json_field = factory.Faker("pydict", allowed_types=[str, int, float])
 
     class Meta:
         model = models.SoftDeleteTestModel

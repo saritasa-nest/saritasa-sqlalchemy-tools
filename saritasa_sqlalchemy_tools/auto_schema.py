@@ -6,7 +6,7 @@ import typing
 
 import pydantic
 import pydantic_core
-import sqlalchemy.dialects.postgresql.ranges
+import sqlalchemy.dialects.postgresql
 import sqlalchemy.orm
 
 from . import models
@@ -292,6 +292,7 @@ class ModelAutoSchema:
             sqlalchemy.Numeric: cls._generate_numeric_field,
             sqlalchemy.Interval: cls._generate_interval_field,
             sqlalchemy.ARRAY: cls._generate_array_field,
+            sqlalchemy.dialects.postgresql.JSON: cls._generate_postgres_json_field,  # noqa: E501
         }
 
     @classmethod
@@ -529,6 +530,22 @@ class ModelAutoSchema:
             list[list_type] | None  # type: ignore
             if model_attribute.nullable
             else list[list_type]  # type: ignore
+        ), pydantic_core.PydanticUndefined
+
+    @classmethod
+    def _generate_postgres_json_field(
+        cls,
+        model: models.SQLAlchemyModel,
+        field: str,
+        model_attribute: models.ModelAttribute,
+        model_type: models.ModelType,
+        extra_field_config: MetaExtraFieldConfig,
+    ) -> PydanticFieldConfig:
+        """Generate postgres json field."""
+        return (
+            dict[str, str | int | float] | None
+            if model_attribute.nullable
+            else dict[str, str | int | float]
         ), pydantic_core.PydanticUndefined
 
 

@@ -3,6 +3,7 @@ import decimal
 import enum
 import typing
 
+import sqlalchemy.dialects.postgresql
 import sqlalchemy.orm
 
 import saritasa_sqlalchemy_tools
@@ -191,6 +192,20 @@ class FieldsMixin:
             sqlalchemy.Interval(),
             nullable=True,
         )
+    )
+
+    json_field: sqlalchemy.orm.Mapped[dict[str, str | int | float]] = (
+        sqlalchemy.orm.mapped_column(
+            sqlalchemy.dialects.postgresql.JSON(),
+            nullable=False,
+        )
+    )
+
+    json_field_nullable: sqlalchemy.orm.Mapped[
+        dict[str, str | int | float]
+    ] = sqlalchemy.orm.mapped_column(
+        sqlalchemy.dialects.postgresql.JSON(),
+        nullable=True,
     )
 
     @property

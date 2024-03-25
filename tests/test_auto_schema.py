@@ -11,8 +11,43 @@ import saritasa_sqlalchemy_tools
 from . import models, repositories
 
 
+@pytest.mark.parametrize(
+    "field",
+    [
+        "id",
+        "created",
+        "modified",
+        "text",
+        "text_nullable",
+        "text_enum",
+        "text_enum_nullable",
+        "number",
+        "number_nullable",
+        "small_number",
+        "small_number_nullable",
+        "decimal_number",
+        "decimal_number_nullable",
+        "boolean",
+        "boolean_nullable",
+        "text_list",
+        "text_list_nullable",
+        "date_time",
+        "date_time_nullable",
+        "date",
+        "date_nullable",
+        "timedelta",
+        "timedelta_nullable",
+        "related_model_id",
+        "related_model_id_nullable",
+        "custom_property",
+        "custom_property_nullable",
+        "json_field",
+        "json_field_nullable",
+    ],
+)
 async def test_auto_schema_generation(
     test_model: models.TestModel,
+    field: str,
 ) -> None:
     """Test schema generation picks correct types from model for schema."""
 
@@ -23,47 +58,41 @@ async def test_auto_schema_generation(
                 from_attributes=True,
                 validate_assignment=True,
             )
-            fields = (
-                "id",
-                "created",
-                "modified",
-                "text",
-                "text_nullable",
-                "text_enum",
-                "text_enum_nullable",
-                "number",
-                "number_nullable",
-                "small_number",
-                "small_number_nullable",
-                "decimal_number",
-                "decimal_number_nullable",
-                "boolean",
-                "boolean_nullable",
-                "text_list",
-                "text_list_nullable",
-                "date_time",
-                "date_time_nullable",
-                "date",
-                "date_nullable",
-                "timedelta",
-                "timedelta_nullable",
-                "related_model_id",
-                "related_model_id_nullable",
-                "custom_property",
-                "custom_property_nullable",
-            )
+            fields = (field,)
 
     schema = AutoSchema.get_schema()
     model = schema.model_validate(test_model)
-    for field in AutoSchema.Meta.fields:
-        assert getattr(model, field) == getattr(test_model, field)
-        if "nullable" not in field and "property" not in field:
-            with pytest.raises(pydantic.ValidationError):
-                setattr(model, field, None)
+    assert getattr(model, field) == getattr(test_model, field)
+    if "nullable" not in field and "property" not in field:
+        with pytest.raises(pydantic.ValidationError):
+            setattr(model, field, None)
 
 
+@pytest.mark.parametrize(
+    [
+        "field",
+        "field_type",
+    ],
+    [
+        ["text", str | None],
+        ["text_enum", models.TestModel.TextEnum | None],
+        ["number", int | None],
+        ["small_number", int | None],
+        ["decimal_number", decimal.Decimal | None],
+        ["boolean", bool | None],
+        ["text_list", list[str] | None],
+        ["date_time", datetime.datetime | None],
+        ["date", datetime.date | None],
+        ["timedelta", datetime.timedelta | None],
+        ["json_field", dict[str, typing.Any] | None],
+        ["custom_property", str | None],
+        ["related_model_id", int | None],
+    ],
+)
 async def test_auto_schema_type_override_generation(
     test_model: models.TestModel,
+    field: str,
+    field_type: type,
 ) -> None:
     """Test that in auto schema generation you can override type.
 
@@ -76,25 +105,16 @@ async def test_auto_schema_type_override_generation(
         class Meta:
             model = models.TestModel
             fields = (
-                ("text", str | None),
-                ("text_enum", models.TestModel.TextEnum | None),
-                ("number", int | None),
-                ("small_number", int | None),
-                ("decimal_number", decimal.Decimal | None),
-                ("boolean", bool | None),
-                ("text_list", list[str] | None),
-                ("date_time", datetime.datetime | None),
-                ("date", datetime.date | None),
-                ("timedelta", datetime.timedelta | None),
-                ("custom_property", str | None),
-                ("related_model_id", int | None),
+                (
+                    field,
+                    field_type,
+                ),
             )
 
     schema = AutoSchema.get_schema()
     model = schema.model_validate(test_model)
-    for field, _ in AutoSchema.Meta.fields:
-        if "property" not in field:
-            setattr(model, field, None)
+    if "property" not in field:
+        setattr(model, field, None)
 
 
 async def test_auto_schema_type_invalid_field_config(
