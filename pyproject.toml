@@ -77,7 +77,7 @@ pytest-async-sqlalchemy = "^0.2.0"
 pytest-sugar = "^1.0.0"
 # Coverage plugin for pytest.
 # https://github.com/pytest-dev/pytest-cov
-pytest-cov = "^4.1.0"
+pytest-cov = "^5.0.0"
 # asyncpg is a database interface library designed specifically for PostgreSQL
 # and Python/asyncio.
 # https://magicstack.github.io/asyncpg/current/
