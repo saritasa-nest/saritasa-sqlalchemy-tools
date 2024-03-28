@@ -480,6 +480,35 @@ class BaseRepository(
             )
         ) or False
 
+    async def values(
+        self,
+        field: types.ColumnField[types.ColumnTypeT],
+        statement: models.SelectStatement[models.BaseModelT] | None = None,
+        joined_load: types.LazyLoadedSequence = (),
+        select_in_load: types.LazyLoadedSequence = (),
+        annotations: types.AnnotationSequence = (),
+        ordering_clauses: ordering.OrderingClauses = (),
+        where: filters.WhereFilters = (),
+        **filters_by: typing.Any,
+    ) -> collections.abc.Sequence[types.ColumnTypeT]:
+        """Get all values of field."""
+        return (
+            await self.db_session.scalars(
+                (
+                    statement
+                    if statement is not None
+                    else self.get_fetch_statement(
+                        joined_load=joined_load,
+                        select_in_load=select_in_load,
+                        annotations=annotations,
+                        ordering_clauses=ordering_clauses,
+                        where=where,
+                        **filters_by,
+                    )
+                ).with_only_columns(field),
+            )
+        ).all()
+
 
 class BaseSoftDeleteRepository(
     BaseRepository[models.BaseSoftDeleteModelT],

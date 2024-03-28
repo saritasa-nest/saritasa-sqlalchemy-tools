@@ -482,3 +482,17 @@ async def test_annotation_query(
     assert instance.related_models_count_query == len(
         test_model.related_models,
     )
+
+
+async def test_values(
+    test_model_list: list[models.TestModel],
+    repository: repositories.TestModelRepository,
+) -> None:
+    """Test values method."""
+    excepted_text_values = {test_model.text for test_model in test_model_list}
+    actual_text_values = set(
+        await repository.values(
+            field=models.TestModel.text,
+        ),
+    )
+    assert excepted_text_values == actual_text_values

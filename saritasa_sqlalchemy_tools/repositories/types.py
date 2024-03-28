@@ -2,6 +2,14 @@ import collections.abc
 import typing
 
 import sqlalchemy.orm
+import sqlalchemy.sql.elements
+import sqlalchemy.sql.roles
+
+ColumnTypeT = typing.TypeVar("ColumnTypeT", bound=typing.Any)
+ColumnField = (
+    sqlalchemy.sql.roles.TypedColumnsClauseRole[ColumnTypeT]
+    | sqlalchemy.sql.roles.ColumnsClauseRole
+)
 
 # For some reason mypy demands that orm.QueryableAttribute has two generic args
 Annotation: typing.TypeAlias = (
