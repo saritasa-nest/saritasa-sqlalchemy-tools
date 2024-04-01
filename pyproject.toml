@@ -48,7 +48,7 @@ auto_schema = ["pydantic"]
 [tool.poetry.group.dev.dependencies]
 # Improved REPL
 ipdb = "^0.13.13"
-ipython = "^8.22.1"
+ipython = "^8.23.0"
 # A framework for managing and maintaining multi-language pre-commit hooks.
 # https://pre-commit.com/
 pre-commit = "^3.7.0"
