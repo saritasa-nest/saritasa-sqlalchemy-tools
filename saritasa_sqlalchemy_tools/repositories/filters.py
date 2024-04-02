@@ -7,7 +7,7 @@ import sqlalchemy
 import sqlalchemy.dialects.postgresql
 import sqlalchemy.orm
 
-from .. import models
+from .. import metrics, models
 
 SQLWhereFilter = sqlalchemy.ColumnExpressionArgument[bool]
 WhereFilter = typing.Union[SQLWhereFilter, "Filter"]
@@ -41,6 +41,7 @@ class Filter:
     field: str
     value: FilterType
 
+    @metrics.tracker
     def transform_filter(
         self,
         model: type[models.BaseModelT],
@@ -61,6 +62,7 @@ class Filter:
             value=self.value,
         )
 
+    @metrics.tracker
     def transform_m2m_filter(
         self,
         field_name: str,
@@ -88,6 +90,7 @@ class Filter:
             ),
         )
 
+    @metrics.tracker
     def transform_simple_filter(
         self,
         field_name: str,
@@ -117,6 +120,7 @@ class Filter:
         return filter_operator
 
 
+@metrics.tracker
 def transform_search_filter(
     model: type[models.BaseModelT],
     search_fields: collections.abc.Sequence[str],

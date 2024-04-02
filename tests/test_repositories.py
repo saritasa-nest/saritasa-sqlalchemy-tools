@@ -214,7 +214,7 @@ async def test_prefetch(
     """Test prefetching of related fields of model."""
     await factories.RelatedModelFactory.create_batch_async(
         session=repository.db_session,
-        test_model_id=test_model.id,
+        test_model_id=test_model.pk,
         size=5,
     )
     await factories.TestModelFactory.create_batch_async(
@@ -242,7 +242,7 @@ async def test_prefetch(
         )(None, *targets)
         instance = await repository.fetch_first(
             statement=select_statement,
-            id=test_model.id,
+            id=test_model.pk,
         )
     else:
         instance = await repository.fetch_first(**args)  # type: ignore
@@ -357,7 +357,7 @@ async def test_filter_m2m(
     await factories.M2MModelFactory.create_batch_async(
         session=repository.db_session,
         size=5,
-        test_model_id=test_model.id,
+        test_model_id=test_model.pk,
         related_model_id=test_model.related_model_id,
     )
     await factories.M2MModelFactory.create_batch_async(
@@ -430,7 +430,7 @@ async def test_annotation(
     await factories.RelatedModelFactory.create_batch_async(
         session=repository.db_session,
         size=5,
-        test_model_id=test_model.id,
+        test_model_id=test_model.pk,
     )
     annotations = (models.TestModel.related_models_count,)
     if reuse_select_statement:
@@ -440,11 +440,11 @@ async def test_annotation(
         )
         instance = await repository.fetch_first(
             statement=select_statement,
-            id=test_model.id,
+            id=test_model.pk,
         )
     else:
         instance = await repository.fetch_first(
-            id=test_model.id,
+            id=test_model.pk,
             annotations=annotations,
         )
     assert instance
@@ -462,7 +462,7 @@ async def test_annotation_query(
 ) -> None:
     """Test annotations loading when using dynamic queries."""
     instance = await repository.fetch_first(
-        id=test_model.id,
+        id=test_model.pk,
         annotations=(
             (
                 models.TestModel.related_models_count_query,

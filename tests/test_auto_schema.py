@@ -202,7 +202,7 @@ async def test_auto_schema_related_field_with_schema(
 
     schema = AutoSchema.get_schema()
     instance = await repository.fetch_first(
-        id=test_model.id,
+        id=test_model.pk,
         select_in_load=(
             models.TestModel.related_model,
             models.TestModel.related_model_nullable,
