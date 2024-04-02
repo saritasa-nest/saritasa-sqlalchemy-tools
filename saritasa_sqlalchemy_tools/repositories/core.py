@@ -7,7 +7,7 @@ import sqlalchemy
 import sqlalchemy.ext.asyncio
 import sqlalchemy.orm
 
-from .. import models
+from .. import metrics, models
 from . import filters, ordering, types
 
 BaseRepositoryT = typing.TypeVar(
@@ -38,6 +38,7 @@ class BaseRepository(
     ) -> None:
         self.db_session = db_session
 
+    @metrics.tracker
     def init_other(
         self,
         repository_class: type[BaseRepositoryT],
@@ -45,10 +46,12 @@ class BaseRepository(
         """Init other repo from current."""
         return repository_class(db_session=self.db_session)
 
+    @metrics.tracker
     async def flush(self) -> None:
         """Perform changes to database."""
         await self.db_session.flush()
 
+    @metrics.tracker
     async def refresh(
         self,
         instance: models.BaseModelT,
@@ -60,6 +63,7 @@ class BaseRepository(
             attribute_names=attribute_names,
         )
 
+    @metrics.tracker
     def expire(self, instance: models.BaseModelT) -> None:
         """Expire instance.
 
@@ -69,6 +73,7 @@ class BaseRepository(
         """
         self.db_session.expire(instance)
 
+    @metrics.tracker
     async def save(
         self,
         instance: models.BaseModelT,
@@ -82,11 +87,13 @@ class BaseRepository(
             await self.refresh(instance, attribute_names)
         return instance
 
+    @metrics.tracker
     async def delete(self, instance: models.BaseModelT) -> None:
         """Delete model instance into db."""
         await self.db_session.delete(instance=instance)
         await self.flush()
 
+    @metrics.tracker
     async def delete_batch(
         self,
         where: filters.WhereFilters = (),
@@ -101,6 +108,7 @@ class BaseRepository(
             ),
         )
 
+    @metrics.tracker
     def model_as_dict(
         self,
         instance: models.BaseModelT,
@@ -113,6 +121,7 @@ class BaseRepository(
             if column_name not in exclude_fields
         }
 
+    @metrics.tracker
     def objects_as_dict(
         self,
         objects: collections.abc.Sequence[models.BaseModelT],
@@ -127,6 +136,7 @@ class BaseRepository(
             for obj in objects
         ]
 
+    @metrics.tracker
     async def insert_batch(
         self,
         objects: collections.abc.Sequence[models.BaseModelT],
@@ -150,6 +160,7 @@ class BaseRepository(
         await self.flush()
         return list(created_objects.all())
 
+    @metrics.tracker
     async def update_batch(
         self,
         objects: collections.abc.Sequence[models.BaseModelT],
@@ -176,6 +187,7 @@ class BaseRepository(
         """Generate empty select statement."""
         return sqlalchemy.select(self.model)
 
+    @metrics.tracker
     def get_annotated_statement(
         self,
         statement: models.SelectStatement[models.BaseModelT] | None = None,
@@ -197,6 +209,7 @@ class BaseRepository(
                 )
         return select_statement
 
+    @metrics.tracker
     def get_filter_statement(
         self,
         statement: models.SelectStatement[models.BaseModelT] | None = None,
@@ -213,6 +226,7 @@ class BaseRepository(
         ).filter_by(**filters_by)
 
     @classmethod
+    @metrics.tracker
     def process_where_filters(
         cls,
         *where: filters.WhereFilter,
@@ -228,6 +242,7 @@ class BaseRepository(
             processed_where_filters.append(where_filter)
         return processed_where_filters
 
+    @metrics.tracker
     def get_order_statement(
         self,
         statement: models.SelectStatement[models.BaseModelT] | None = None,
@@ -243,6 +258,7 @@ class BaseRepository(
         )
 
     @classmethod
+    @metrics.tracker
     def process_ordering_clauses(
         cls,
         *clauses: ordering.OrderingClause,
@@ -256,6 +272,7 @@ class BaseRepository(
                 processed_ordering_clauses.append(clause)
         return processed_ordering_clauses
 
+    @metrics.tracker
     def get_pagination_statement(
         self,
         statement: models.SelectStatement[models.BaseModelT] | None = None,
@@ -273,6 +290,7 @@ class BaseRepository(
             select_statement = select_statement.limit(limit)
         return select_statement
 
+    @metrics.tracker
     def get_joined_load_statement(
         self,
         statement: models.SelectStatement[models.BaseModelT] | None = None,
@@ -294,6 +312,7 @@ class BaseRepository(
             )
         return select_statement
 
+    @metrics.tracker
     def get_select_in_load_statement(
         self,
         statement: models.SelectStatement[models.BaseModelT] | None = None,
@@ -315,6 +334,7 @@ class BaseRepository(
             )
         return select_statement
 
+    @metrics.tracker
     def get_fetch_statement(
         self,
         statement: models.SelectStatement[models.BaseModelT] | None = None,
@@ -328,34 +348,35 @@ class BaseRepository(
         **filters_by: typing.Any,
     ) -> models.SelectStatement[models.BaseModelT]:
         """Prepare statement for fetching."""
-        statement = self.get_joined_load_statement(
+        fetch_statement = self.get_joined_load_statement(
             statement,
             *joined_load,
         )
-        statement = self.get_select_in_load_statement(
-            statement,
+        fetch_statement = self.get_select_in_load_statement(
+            fetch_statement,
             *select_in_load,
         )
-        statement = self.get_annotated_statement(
-            statement,
+        fetch_statement = self.get_annotated_statement(
+            fetch_statement,
             *annotations,
         )
-        statement = self.get_order_statement(
-            statement,
+        fetch_statement = self.get_order_statement(
+            fetch_statement,
             *ordering_clauses,
         )
-        statement = self.get_filter_statement(
-            statement,
+        fetch_statement = self.get_filter_statement(
+            fetch_statement,
             *where,
             **filters_by,
         )
-        statement = self.get_pagination_statement(
-            statement,
+        fetch_statement = self.get_pagination_statement(
+            fetch_statement,
             offset=offset,
             limit=limit,
         )
-        return statement
+        return fetch_statement
 
+    @metrics.tracker
     async def fetch(
         self,
         statement: models.SelectStatement[models.BaseModelT] | None = None,
@@ -370,7 +391,7 @@ class BaseRepository(
         **filters_by: typing.Any,
     ) -> sqlalchemy.ScalarResult[models.BaseModelT]:
         """Fetch entries."""
-        scalar_result = await self.db_session.scalars(
+        scalar_result = await metrics.tracker(self.db_session.scalars)(
             statement=self.get_fetch_statement(
                 statement=statement,
                 offset=offset,
@@ -387,6 +408,7 @@ class BaseRepository(
             scalar_result = scalar_result.unique()
         return scalar_result
 
+    @metrics.tracker
     async def fetch_all(
         self,
         statement: models.SelectStatement[models.BaseModelT] | None = None,
@@ -416,6 +438,7 @@ class BaseRepository(
             )
         ).all()
 
+    @metrics.tracker
     async def fetch_first(
         self,
         statement: models.SelectStatement[models.BaseModelT] | None = None,
@@ -445,6 +468,7 @@ class BaseRepository(
             )
         ).first()
 
+    @metrics.tracker
     async def count(
         self,
         where: filters.WhereFilters = (),
@@ -452,7 +476,7 @@ class BaseRepository(
     ) -> int:
         """Get count of entries."""
         return (
-            await self.db_session.scalar(
+            await metrics.tracker(self.db_session.scalar)(
                 sqlalchemy.select(sqlalchemy.func.count())
                 .select_from(self.model)
                 .where(*self.process_where_filters(*where))
@@ -460,6 +484,7 @@ class BaseRepository(
             )
         ) or 0
 
+    @metrics.tracker
     async def exists(
         self,
         where: filters.WhereFilters = (),
@@ -467,7 +492,7 @@ class BaseRepository(
     ) -> bool:
         """Check existence of entries."""
         return (
-            await self.db_session.scalar(
+            await metrics.tracker(self.db_session.scalar)(
                 sqlalchemy.select(
                     sqlalchemy.sql.exists(
                         self.select_statement.where(
@@ -480,6 +505,7 @@ class BaseRepository(
             )
         ) or False
 
+    @metrics.tracker
     async def values(
         self,
         field: types.ColumnField[types.ColumnTypeT],
@@ -493,7 +519,7 @@ class BaseRepository(
     ) -> collections.abc.Sequence[types.ColumnTypeT]:
         """Get all values of field."""
         return (
-            await self.db_session.scalars(
+            await metrics.tracker(self.db_session.scalars)(
                 (
                     statement
                     if statement is not None
@@ -515,6 +541,7 @@ class BaseSoftDeleteRepository(
 ):
     """Repository for model with soft delete feature."""
 
+    @metrics.tracker
     async def delete(
         self,
         instance: models.BaseSoftDeleteModelT,
@@ -525,6 +552,7 @@ class BaseSoftDeleteRepository(
         )
         await self.save(instance=instance)
 
+    @metrics.tracker
     async def force_delete(
         self,
         instance: models.BaseSoftDeleteModelT,

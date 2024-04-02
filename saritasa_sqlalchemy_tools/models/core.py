@@ -6,6 +6,8 @@ import sqlalchemy
 import sqlalchemy.ext.asyncio
 import sqlalchemy.orm
 
+from .. import metrics
+
 
 class TimeStampedMixin:
     """A mixin that adds timestamped fields to the model."""
@@ -64,6 +66,7 @@ class BaseModel(
     m2m_filters: typing.ClassVar[dict[str, M2MFilterConfig]] = {}
 
     @property
+    @metrics.tracker
     def as_dict(self) -> dict[str, typing.Any]:
         """Convert model to dict."""
         return {
@@ -71,6 +74,11 @@ class BaseModel(
             for column in self.__table__.columns
             if (column_name := column.name)
         }
+
+    @property
+    def pk(self) -> typing.Any:
+        """Get primary key value."""
+        return getattr(self, self.pk_field)
 
 
 class BaseIDModel(IDMixin, BaseModel):
