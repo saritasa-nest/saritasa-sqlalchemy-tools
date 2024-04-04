@@ -14,6 +14,7 @@ ns = invoke.Collection(  # type: ignore
     saritasa_invocations.poetry,
     saritasa_invocations.mypy,
     saritasa_invocations.pytest,
+    saritasa_invocations.alembic,
 )
 
 # Configurations for run command
@@ -27,6 +28,9 @@ ns.configure(
             project_name="saritasa-sqlalchemy-tools",
             docker=saritasa_invocations.DockerSettings(
                 main_containers=("postgres",),
+            ),
+            alembic=saritasa_invocations.AlembicSettings(
+                migrations_folder="tests/alembic/versions",
             ),
         ),
     },

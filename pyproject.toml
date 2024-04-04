@@ -40,10 +40,15 @@ factory-boy  = {version= "<4", optional = true}
 # Data validation using Python type hints
 # https://docs.pydantic.dev/latest/
 pydantic = {version= "<3", optional = true}
+# Alembic is a lightweight database migration tool for usage with the
+# SQLAlchemy Database Toolkit for Python
+# https://alembic.sqlalchemy.org/
+alembic = {version= "<2", optional = true}
 
 [tool.poetry.extras]
 factories = ["factory-boy"]
 auto_schema = ["pydantic"]
+migrations = ["alembic"]
 
 [tool.poetry.group.dev.dependencies]
 # Improved REPL
@@ -251,6 +256,7 @@ asyncio_mode = "auto"
 [tool.coverage.run]
 omit = [
   "saritasa_sqlalchemy_tools/session.py",
+  "saritasa_sqlalchemy_tools/alembic.py",
 ]
 
 # https://docformatter.readthedocs.io/en/latest/configuration.html#
