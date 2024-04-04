@@ -1,8 +1,5 @@
-from .auto_schema import (
-    ModelAutoSchema,
-    ModelAutoSchemaError,
-    ModelAutoSchemaT,
-)
+import contextlib
+
 from .models import (
     BaseIDModel,
     BaseModel,
@@ -50,9 +47,22 @@ from .session import (
     get_async_engine,
     get_async_session_factory,
 )
-from .testing import AsyncSQLAlchemyModelFactory, AsyncSQLAlchemyOptions
+
+with contextlib.suppress(ImportError):
+    from .testing import AsyncSQLAlchemyModelFactory, AsyncSQLAlchemyOptions
+
+with contextlib.suppress(ImportError):
+    from .alembic import AlembicMigrations
+
+with contextlib.suppress(ImportError):
+    from .auto_schema import (
+        ModelAutoSchema,
+        ModelAutoSchemaError,
+        ModelAutoSchemaT,
+    )
 
 __all__ = (
+    "AlembicMigrations",
     "AsyncSQLAlchemyModelFactory",
     "AsyncSQLAlchemyOptions",
     "Session",

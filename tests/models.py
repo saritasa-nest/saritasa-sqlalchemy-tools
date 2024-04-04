@@ -33,6 +33,7 @@ class RelatedModel(
             sqlalchemy.ForeignKey(
                 "test_model.id",
                 ondelete="CASCADE",
+                use_alter=True,
             ),
             nullable=True,
         )
