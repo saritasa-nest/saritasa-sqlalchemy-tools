@@ -304,7 +304,10 @@ class BaseRepository(
         for target in targets:
             joined_load = []
             if isinstance(target, collections.abc.Sequence):
-                joined_load.append(sqlalchemy.orm.joinedload(*target))
+                joined_loader = sqlalchemy.orm.joinedload(target[0])
+                for sub_target in target[1:]:
+                    joined_loader = joined_loader.joinedload(sub_target)
+                joined_load.append(joined_loader)
             else:
                 joined_load.append(sqlalchemy.orm.joinedload(target))
             select_statement = select_statement.options(
@@ -326,7 +329,10 @@ class BaseRepository(
         for target in targets:
             select_in_load = []
             if isinstance(target, collections.abc.Sequence):
-                select_in_load.append(sqlalchemy.orm.selectinload(*target))
+                select_loader = sqlalchemy.orm.selectinload(target[0])
+                for sub_target in target[1:]:
+                    select_loader = select_loader.selectinload(sub_target)
+                select_in_load.append(select_loader)
             else:
                 select_in_load.append(sqlalchemy.orm.selectinload(target))
             select_statement = select_statement.options(
