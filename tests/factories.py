@@ -9,7 +9,10 @@ from . import models, repositories
 
 
 class TestModelFactory(
-    saritasa_sqlalchemy_tools.AsyncSQLAlchemyModelFactory[models.TestModel],
+    saritasa_sqlalchemy_tools.AsyncSQLAlchemyModelFactory[
+        models.TestModel,
+        repositories.TestModelRepository,
+    ],
 ):
     """Factory to generate TestModel."""
 
@@ -56,7 +59,8 @@ class TestModelFactory(
 
 class SoftDeleteTestModelFactory(
     saritasa_sqlalchemy_tools.AsyncSQLAlchemyModelFactory[
-        models.SoftDeleteTestModel
+        models.SoftDeleteTestModel,
+        repositories.SoftDeleteTestModelRepository,
     ],
 ):
     """Factory to generate SoftDeleteTestModel."""
@@ -99,7 +103,10 @@ class SoftDeleteTestModelFactory(
 
 
 class RelatedModelFactory(
-    saritasa_sqlalchemy_tools.AsyncSQLAlchemyModelFactory[models.RelatedModel],
+    saritasa_sqlalchemy_tools.AsyncSQLAlchemyModelFactory[
+        models.RelatedModel,
+        repositories.RelatedModelRepository,
+    ],
 ):
     """Factory to generate RelatedModel."""
 
@@ -109,7 +116,10 @@ class RelatedModelFactory(
 
 
 class M2MModelFactory(
-    saritasa_sqlalchemy_tools.AsyncSQLAlchemyModelFactory[models.M2MModel],
+    saritasa_sqlalchemy_tools.AsyncSQLAlchemyModelFactory[
+        models.M2MModel,
+        repositories.M2MModelRepository,
+    ],
 ):
     """Factory to generate M2MModel."""
 

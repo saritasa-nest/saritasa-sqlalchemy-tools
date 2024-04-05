@@ -20,7 +20,10 @@ class AsyncSQLAlchemyOptions(factory.alchemy.SQLAlchemyOptions):
 
 class AsyncSQLAlchemyModelFactory(
     factory.alchemy.SQLAlchemyModelFactory,
-    typing.Generic[models.BaseModelT],
+    typing.Generic[
+        models.BaseModelT,
+        repositories.BaseRepositoryT,
+    ],
 ):
     """Factory with ability to create instances asynchronously."""
 
@@ -40,9 +43,7 @@ class AsyncSQLAlchemyModelFactory(
             ),
         )
         instance: models.BaseModelT = cls.build(**kwargs)
-        repository_class: (
-            type[repositories.BaseRepository[models.BaseModelT,]] | None
-        ) = getattr(
+        repository_class: type[repositories.BaseRepositoryT] | None = getattr(
             cls._meta,
             "repository",
             None,
@@ -62,7 +63,11 @@ class AsyncSQLAlchemyModelFactory(
             raise ValueError(  # pragma: no cover
                 "Created instance wasn't found in database",
             )
-        return instance_from_db
+        return await cls.post_save(
+            repository=repository,
+            instance=instance_from_db,
+            session=session,
+        )
 
     @classmethod
     async def create_batch_async(
@@ -124,3 +129,13 @@ class AsyncSQLAlchemyModelFactory(
                     size=size,
                 )
         return generated_instances
+
+    @classmethod
+    async def post_save(
+        cls,
+        repository: repositories.BaseRepositoryT,
+        instance: models.BaseModelT,
+        session: session.Session,
+    ) -> models.BaseModelT:
+        """Preform actions after instance was generated."""
+        return instance

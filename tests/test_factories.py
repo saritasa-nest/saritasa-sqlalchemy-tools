@@ -13,7 +13,8 @@ async def test_factory_missing_repository(
 
     class TestModelFactory(
         saritasa_sqlalchemy_tools.AsyncSQLAlchemyModelFactory[
-            models.TestModel
+            models.TestModel,
+            repositories.TestModelRepository,
         ],
     ):
         """Factory to generate TestModel."""
