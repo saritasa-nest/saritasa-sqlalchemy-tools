@@ -263,6 +263,22 @@ async def test_auto_schema_use_both_config_and_model() -> None:
         AutoSchema.get_schema()
 
 
+async def test_auto_schema_use_model() -> None:
+    """Test schema generation works when base model is specified."""
+
+    class AutoSchema(saritasa_sqlalchemy_tools.ModelAutoSchema):
+        class Meta:
+            model = models.TestModel
+            base_model = pydantic.BaseModel
+            fields = (
+                "id",
+                "created",
+                "modified",
+            )
+
+    AutoSchema.get_schema()
+
+
 def custom_validator(
     cls,  # noqa: ANN001
     value: typing.Any,

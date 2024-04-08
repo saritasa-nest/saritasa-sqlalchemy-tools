@@ -114,13 +114,15 @@ class ModelAutoSchema:
         model_config = getattr(
             cls.Meta,
             "model_config",
-            pydantic.ConfigDict(from_attributes=True),
+            None,
         )
         # Only config or base model could be passed to create_model
-        if base_model:
+        if base_model and model_config:
             raise ValueError(
                 "Only config or base model could be passed to create_model",
             )
+        if base_model is None and model_config is None:
+            model_config = pydantic.ConfigDict(from_attributes=True)
 
         extra_fields_config = getattr(
             cls.Meta,
