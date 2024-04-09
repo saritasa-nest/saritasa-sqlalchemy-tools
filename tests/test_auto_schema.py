@@ -10,6 +10,10 @@ import saritasa_sqlalchemy_tools
 
 from . import models, repositories
 
+SPECIAL_POSTGRES_TYPES = {
+    saritasa_sqlalchemy_tools.PostgresRange[datetime.date],
+}
+
 
 @pytest.mark.parametrize(
     "field",
@@ -43,6 +47,8 @@ from . import models, repositories
         "custom_property_nullable",
         "json_field",
         "json_field_nullable",
+        "date_range",
+        "date_range_nullable",
     ],
 )
 async def test_auto_schema_generation(
@@ -62,7 +68,10 @@ async def test_auto_schema_generation(
 
     schema = AutoSchema.get_schema()
     model = schema.model_validate(test_model)
-    assert getattr(model, field) == getattr(test_model, field)
+    value = getattr(model, field)
+    if value.__class__ in SPECIAL_POSTGRES_TYPES:
+        value = value.to_db()
+    assert value == getattr(test_model, field)
     if "nullable" not in field and "property" not in field:
         with pytest.raises(pydantic.ValidationError):
             setattr(model, field, None)
@@ -87,6 +96,10 @@ async def test_auto_schema_generation(
         ["json_field", dict[str, typing.Any] | None],
         ["custom_property", str | None],
         ["related_model_id", int | None],
+        [
+            "date_range",
+            saritasa_sqlalchemy_tools.PostgresRange[datetime.date] | None,
+        ],
     ],
 )
 async def test_auto_schema_type_override_generation(
@@ -133,7 +146,7 @@ async def test_auto_schema_type_invalid_field_config(
             fields = (("id", int, 1),)
 
     with pytest.raises(
-        saritasa_sqlalchemy_tools.auto_schema.UnableProcessTypeError,
+        saritasa_sqlalchemy_tools.schema.UnableProcessTypeError,
         match=re.escape(
             "Can't process the following field ('id', <class 'int'>, 1)",
         ),
@@ -160,7 +173,7 @@ async def test_auto_schema_related_field_with_no_schema(
             )
 
     with pytest.raises(
-        saritasa_sqlalchemy_tools.auto_schema.UnableProcessTypeError,
+        saritasa_sqlalchemy_tools.schema.UnableProcessTypeError,
         match=re.escape(
             "Schema generation is not supported for relationship "
             "fields(related_model), please use auto-schema or pydantic class",

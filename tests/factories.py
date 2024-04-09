@@ -47,6 +47,7 @@ class TestModelFactory(
     date = factory.Faker("date_between")
     timedelta = factory.Faker("time_delta")
     json_field = factory.Faker("pydict", allowed_types=[str, int, float])
+    date_range = saritasa_sqlalchemy_tools.DateRangeFactory()
 
     class Meta:
         model = models.TestModel
@@ -96,6 +97,7 @@ class SoftDeleteTestModelFactory(
     date = factory.Faker("date_between")
     timedelta = factory.Faker("time_delta")
     json_field = factory.Faker("pydict", allowed_types=[str, int, float])
+    date_range = saritasa_sqlalchemy_tools.DateRangeFactory()
 
     class Meta:
         model = models.SoftDeleteTestModel

@@ -9,7 +9,8 @@ import pydantic_core
 import sqlalchemy.dialects.postgresql
 import sqlalchemy.orm
 
-from . import models
+from .. import models
+from . import fields
 
 PydanticFieldConfig: typing.TypeAlias = tuple[
     types.UnionType
@@ -295,6 +296,7 @@ class ModelAutoSchema:
             sqlalchemy.Interval: cls._generate_interval_field,
             sqlalchemy.ARRAY: cls._generate_array_field,
             sqlalchemy.dialects.postgresql.JSON: cls._generate_postgres_json_field,  # noqa: E501
+            sqlalchemy.dialects.postgresql.ranges.DATERANGE: cls._generate_date_range,  # noqa: E501
         }
 
     @classmethod
@@ -548,6 +550,22 @@ class ModelAutoSchema:
             dict[str, str | int | float] | None
             if model_attribute.nullable
             else dict[str, str | int | float]
+        ), pydantic_core.PydanticUndefined
+
+    @classmethod
+    def _generate_date_range(
+        cls,
+        model: models.SQLAlchemyModel,
+        field: str,
+        model_attribute: models.ModelAttribute,
+        model_type: models.ModelType,
+        extra_field_config: MetaExtraFieldConfig,
+    ) -> PydanticFieldConfig:
+        """Generate date range field."""
+        return (
+            fields.PostgresRange[datetime.date] | None
+            if model_attribute.nullable
+            else fields.PostgresRange[datetime.date]
         ), pydantic_core.PydanticUndefined
 
 

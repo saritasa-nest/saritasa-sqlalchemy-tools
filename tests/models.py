@@ -209,6 +209,19 @@ class FieldsMixin:
         nullable=True,
     )
 
+    date_range: sqlalchemy.orm.Mapped[
+        sqlalchemy.dialects.postgresql.Range[datetime.date]
+    ] = sqlalchemy.orm.mapped_column(
+        sqlalchemy.dialects.postgresql.DATERANGE,
+    )
+
+    date_range_nullable: sqlalchemy.orm.Mapped[
+        sqlalchemy.dialects.postgresql.Range[datetime.date]
+    ] = sqlalchemy.orm.mapped_column(
+        sqlalchemy.dialects.postgresql.DATERANGE,
+        nullable=True,
+    )
+
     @property
     def custom_property(self) -> str:
         """Implement property."""

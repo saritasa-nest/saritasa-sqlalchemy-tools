@@ -50,22 +50,29 @@ from .session import (
 )
 
 with contextlib.suppress(ImportError):
-    from .testing import AsyncSQLAlchemyModelFactory, AsyncSQLAlchemyOptions
+    from .testing import (
+        AsyncSQLAlchemyModelFactory,
+        AsyncSQLAlchemyOptions,
+        DateRangeFactory,
+    )
 
 with contextlib.suppress(ImportError):
     from .alembic import AlembicMigrations
 
 with contextlib.suppress(ImportError):
-    from .auto_schema import (
+    from .schema import (
         ModelAutoSchema,
         ModelAutoSchemaError,
         ModelAutoSchemaT,
+        PostgresRange,
+        PostgresRangeTypeT,
     )
 
 __all__ = (
     "AlembicMigrations",
     "AsyncSQLAlchemyModelFactory",
     "AsyncSQLAlchemyOptions",
+    "DateRangeFactory",
     "Session",
     "SessionFactory",
     "get_async_db_session",
@@ -111,4 +118,6 @@ __all__ = (
     "ModelAutoSchema",
     "ModelAutoSchemaError",
     "ModelAutoSchemaT",
+    "PostgresRange",
+    "PostgresRangeTypeT",
 )
