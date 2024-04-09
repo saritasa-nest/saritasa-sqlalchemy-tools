@@ -1,6 +1,7 @@
 from .core import BaseRepository, BaseRepositoryT, BaseSoftDeleteRepository
 from .filters import (
     Filter,
+    FilterType,
     SQLWhereFilter,
     WhereFilter,
     WhereFilters,
