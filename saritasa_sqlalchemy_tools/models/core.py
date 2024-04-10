@@ -1,4 +1,3 @@
-import dataclasses
 import datetime
 import typing
 
@@ -46,15 +45,6 @@ class IDMixin:
     )
 
 
-@dataclasses.dataclass
-class M2MFilterConfig:
-    """Configuration for m2m filter."""
-
-    relation_field: str
-    filter_field: str
-    match_field: str
-
-
 class BaseModel(
     sqlalchemy.ext.asyncio.AsyncAttrs,
     sqlalchemy.orm.DeclarativeBase,
@@ -63,7 +53,6 @@ class BaseModel(
 
     __abstract__ = True
     pk_field: str
-    m2m_filters: typing.ClassVar[dict[str, M2MFilterConfig]] = {}
 
     @property
     @metrics.tracker

@@ -3,7 +3,6 @@ from .core import (
     BaseModel,
     BaseSoftDeleteModel,
     BaseTimeStampedModel,
-    M2MFilterConfig,
     SoftDeleteBaseIDModel,
     SoftDeleteMixin,
     TimeStampedBaseIDModel,

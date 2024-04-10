@@ -241,14 +241,6 @@ class TestModel(
 
     __tablename__ = "test_model"
 
-    m2m_filters: typing.ClassVar = {
-        "m2m_related_model_id": saritasa_sqlalchemy_tools.M2MFilterConfig(
-            relation_field="m2m_associations",
-            filter_field="related_model_id",
-            match_field="test_model_id",
-        ),
-    }
-
     related_model_id: sqlalchemy.orm.Mapped[int] = (
         sqlalchemy.orm.mapped_column(
             sqlalchemy.ForeignKey(

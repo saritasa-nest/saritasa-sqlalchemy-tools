@@ -47,46 +47,44 @@ class Filter:
         model: type[models.BaseModelT],
     ) -> SQLWhereFilter:
         """Transform filter valid for sqlalchemy."""
-        field_name, filter_arg = self.field.split("__")
-        if field_name in model.m2m_filters:
-            return self.transform_m2m_filter(
+        field_name, *filter_arg = self.field.split("__")
+        if isinstance(
+            getattr(model, field_name).property,
+            sqlalchemy.orm.Relationship,
+        ):
+            return self.transform_relationship(
                 field_name=field_name,
                 filter_arg=filter_arg,
                 model=model,
                 value=self.value,
             )
+        if len(filter_arg) > 1:
+            raise ValueError(
+                "Long filter args only supported for relationships!",
+            )
         return self.transform_simple_filter(
             field_name=field_name,
-            filter_arg=filter_arg,
+            filter_arg=filter_arg[0],
             model=model,
             value=self.value,
         )
 
-    @metrics.tracker
-    def transform_m2m_filter(
+    def transform_relationship(
         self,
         field_name: str,
-        filter_arg: str,
+        filter_arg: collections.abc.Sequence[str],
         model: type[models.BaseModelT],
         value: FilterType,
     ) -> SQLWhereFilter:
-        """Transform m2m filter for sqlalchemy."""
-        m2m_config = model.m2m_filters[field_name]
-        m2m_model = getattr(model, m2m_config.relation_field).mapper.class_
-        return sqlalchemy.and_(
-            self.transform_simple_filter(
-                m2m_config.filter_field,
-                filter_arg,
-                model=m2m_model,
+        """Prepare relationship filter."""
+        field: models.ModelAttribute = getattr(model, field_name)
+        property_filter = field.any if field.property.uselist else field.has
+        return property_filter(
+            self.__class__(
+                field="__".join(filter_arg),
                 value=value,
-            ),
-            getattr(
-                m2m_model,
-                m2m_config.match_field,
-            )
-            == getattr(
-                model,
-                model.pk_field,
+            ).transform_filter(
+                model=field.property.mapper.class_,
             ),
         )
 
@@ -100,9 +98,10 @@ class Filter:
     ) -> SQLWhereFilter:
         """Transform simple filter for sqlalchemy."""
         filter_args_mapping = {
-            "exact": "is_",
+            "is": "is_",
             "in": "in_",
             "overlaps": "overlaps",
+            "exact": "__eq__",
             "gt": "__gt__",
             "gte": "__ge__",
             "lt": "__lt__",

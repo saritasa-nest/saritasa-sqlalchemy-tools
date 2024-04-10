@@ -1,3 +1,5 @@
+import re
+
 import pytest
 import sqlalchemy
 
@@ -368,7 +370,7 @@ async def test_filter_m2m(
     args = {
         "where": [
             saritasa_sqlalchemy_tools.Filter(
-                field="m2m_related_model_id__in",
+                field="m2m_related_models__id__in",
                 value=[test_model.related_model_id],
             ),
         ],
@@ -496,3 +498,85 @@ async def test_values(
         ),
     )
     assert excepted_text_values == actual_text_values
+
+
+async def test_filter_related_models_has(
+    test_model: models.TestModel,
+    test_model_list: list[models.TestModel],
+    repository: repositories.TestModelRepository,
+) -> None:
+    """Test filtration thought related models via one-to-many."""
+    await factories.RelatedModelFactory.create_batch_async(
+        session=repository.db_session,
+        size=5,
+    )
+    related_model = await factories.RelatedModelFactory.create_async(
+        session=repository.db_session,
+        test_model_id=test_model.pk,
+    )
+    new_test_model = await factories.TestModelFactory.create_async(
+        session=repository.db_session,
+        related_model_id=related_model.pk,
+    )
+    result = await repository.fetch_all(
+        where=(
+            saritasa_sqlalchemy_tools.Filter(
+                field="related_model__test_model__text__exact",
+                value=test_model.text,
+            ),
+        ),
+    )
+    assert len(result) == 1
+    assert result[0].id == new_test_model.id
+    assert result[0].related_model_id == new_test_model.related_model_id
+
+
+async def test_filter_related_models_any(
+    test_model: models.TestModel,
+    test_model_list: list[models.TestModel],
+    repository: repositories.TestModelRepository,
+) -> None:
+    """Test filtration thought related models via many-to-one."""
+    await factories.RelatedModelFactory.create_batch_async(
+        session=repository.db_session,
+        size=5,
+    )
+    related_models = await factories.RelatedModelFactory.create_batch_async(
+        session=repository.db_session,
+        size=5,
+        test_model_id=test_model.pk,
+    )
+    new_test_model = await factories.TestModelFactory.create_async(
+        session=repository.db_session,
+        related_model_id=related_models[0].pk,
+    )
+
+    result = await repository.fetch_all(
+        where=(
+            saritasa_sqlalchemy_tools.Filter(
+                field="related_models__test_model_list__text__exact",
+                value=new_test_model.text,
+            ),
+        ),
+    )
+    assert len(result) == 1
+    assert result[0].id == test_model.id
+
+
+async def test_filter_invalid_filter_arg(
+    test_model_list: list[models.TestModel],
+    repository: repositories.TestModelRepository,
+) -> None:
+    """Test when filter args has too many `__`."""
+    with pytest.raises(
+        ValueError,
+        match=re.escape("Long filter args only supported for relationships!"),
+    ):
+        await repository.fetch_all(
+            where=(
+                saritasa_sqlalchemy_tools.Filter(
+                    field="text__exact__in",
+                    value="Test",
+                ),
+            ),
+        )
