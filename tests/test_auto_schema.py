@@ -401,3 +401,15 @@ def test_custom_field_validators_property_custom_type(
         match=re.escape("This is custom validator"),
     ):
         schema.model_validate(test_model)
+
+
+def test_postgres_range_validation() -> None:
+    """Test that bound validation works for PostgresRange."""
+    with pytest.raises(
+        pydantic.ValidationError,
+        match=re.escape("Lower must be equal or less than upper limit"),
+    ):
+        saritasa_sqlalchemy_tools.PostgresRange(
+            lower=10,
+            upper=1,
+        )

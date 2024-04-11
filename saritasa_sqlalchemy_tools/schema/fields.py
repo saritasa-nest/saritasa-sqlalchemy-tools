@@ -48,3 +48,12 @@ class PostgresRange(pydantic.BaseModel, typing.Generic[PostgresRangeTypeT]):
                 if self.upper:  # pragma: no cover
                     self.upper = self.upper - datetime.timedelta(days=1)
         self.bounds = "[]"
+
+    @pydantic.model_validator(mode="after")
+    def check_passwords_match(self) -> typing.Self:
+        """Validate range bounds."""
+        if self.lower is None or self.upper is None:
+            return self
+        if self.lower > self.upper:
+            raise ValueError("Lower must be equal or less than upper limit")
+        return self
