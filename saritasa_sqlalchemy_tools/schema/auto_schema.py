@@ -563,9 +563,9 @@ class ModelAutoSchema:
     ) -> PydanticFieldConfig:
         """Generate date range field."""
         return (
-            fields.PostgresRange[datetime.date] | None
+            fields.PostgresDateRange | None
             if model_attribute.nullable
-            else fields.PostgresRange[datetime.date]
+            else fields.PostgresDateRange
         ), pydantic_core.PydanticUndefined
 
 

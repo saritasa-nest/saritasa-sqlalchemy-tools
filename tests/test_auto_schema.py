@@ -11,7 +11,7 @@ import saritasa_sqlalchemy_tools
 from . import models, repositories
 
 SPECIAL_POSTGRES_TYPES = {
-    saritasa_sqlalchemy_tools.PostgresRange[datetime.date],
+    saritasa_sqlalchemy_tools.PostgresDateRange,
 }
 
 

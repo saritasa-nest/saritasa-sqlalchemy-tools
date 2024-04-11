@@ -63,6 +63,7 @@ with contextlib.suppress(ImportError):
         ModelAutoSchema,
         ModelAutoSchemaError,
         ModelAutoSchemaT,
+        PostgresDateRange,
         PostgresRange,
         PostgresRangeTypeT,
     )
@@ -118,4 +119,5 @@ __all__ = (
     "ModelAutoSchemaT",
     "PostgresRange",
     "PostgresRangeTypeT",
+    "PostgresDateRange",
 )

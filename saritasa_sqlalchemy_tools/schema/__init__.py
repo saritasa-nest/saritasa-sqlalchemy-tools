@@ -5,4 +5,4 @@ from .auto_schema import (
     UnableProcessTypeError,
     UnableToExtractEnumClassError,
 )
-from .fields import PostgresRange, PostgresRangeTypeT
+from .fields import PostgresDateRange, PostgresRange, PostgresRangeTypeT
