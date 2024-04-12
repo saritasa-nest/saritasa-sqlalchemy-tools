@@ -5,4 +5,5 @@ from .auto_schema import (
     UnableProcessTypeError,
     UnableToExtractEnumClassError,
 )
+from .enums import OpenAPIDocsEnumMixin
 from .fields import PostgresDateRange, PostgresRange, PostgresRangeTypeT

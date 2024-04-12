@@ -5,10 +5,15 @@ import typing
 import pydantic
 import sqlalchemy.dialects.postgresql
 
+from . import enums
+
 PostgresRangeTypeT = typing.TypeVar("PostgresRangeTypeT", bound=typing.Any)
 
 
-class PostgresRangeBound(enum.StrEnum):
+class PostgresRangeBound(
+    enums.OpenAPIDocsEnumMixin,
+    enum.StrEnum,
+):
     """Describe bounds for PostgresRange."""
 
     include_include = "[]"

@@ -67,6 +67,7 @@ async def test_auto_schema_generation(
             fields = (field,)
 
     schema = AutoSchema.get_schema()
+    schema.model_json_schema()
     model = schema.model_validate(test_model)
     value = getattr(model, field)
     if value.__class__ in SPECIAL_POSTGRES_TYPES:
@@ -125,6 +126,7 @@ async def test_auto_schema_type_override_generation(
             )
 
     schema = AutoSchema.get_schema()
+    schema.model_json_schema()
     model = schema.model_validate(test_model)
     if "property" not in field:
         setattr(model, field, None)
@@ -214,6 +216,7 @@ async def test_auto_schema_related_field_with_schema(
             )
 
     schema = AutoSchema.get_schema()
+    schema.model_json_schema()
     instance = await repository.fetch_first(
         id=test_model.pk,
         select_in_load=(
@@ -289,7 +292,7 @@ async def test_auto_schema_use_model() -> None:
                 "modified",
             )
 
-    AutoSchema.get_schema()
+    AutoSchema.get_schema().model_json_schema()
 
 
 def custom_validator(
@@ -320,6 +323,7 @@ def test_custom_field_validators(
             }
 
     schema = AutoSchema.get_schema()
+    schema.model_json_schema()
     with pytest.raises(
         pydantic.ValidationError,
         match=re.escape("This is custom validator"),
@@ -345,6 +349,7 @@ def test_custom_field_validators_custom_type(
             }
 
     schema = AutoSchema.get_schema()
+    schema.model_json_schema()
     with pytest.raises(
         pydantic.ValidationError,
         match=re.escape("This is custom validator"),
@@ -370,6 +375,7 @@ def test_custom_field_validators_property(
             }
 
     schema = AutoSchema.get_schema()
+    schema.model_json_schema()
     with pytest.raises(
         pydantic.ValidationError,
         match=re.escape("This is custom validator"),
@@ -396,6 +402,7 @@ def test_custom_field_validators_property_custom_type(
             }
 
     schema = AutoSchema.get_schema()
+    schema.model_json_schema()
     with pytest.raises(
         pydantic.ValidationError,
         match=re.escape("This is custom validator"),
@@ -413,3 +420,8 @@ def test_postgres_range_validation() -> None:
             lower=10,
             upper=1,
         )
+
+
+def test_postgres_range_validation_one_bound_none() -> None:
+    """Test validation for PostgresRange with one bound as none."""
+    saritasa_sqlalchemy_tools.PostgresRange(lower=10, upper=None)

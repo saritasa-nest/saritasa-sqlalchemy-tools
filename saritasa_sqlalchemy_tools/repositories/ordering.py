@@ -4,6 +4,13 @@ import typing
 
 import sqlalchemy
 
+try:
+    from ..schema import OpenAPIDocsEnumMixin  # type: ignore
+except ImportError:  # pragma: no cover
+
+    class OpenAPIDocsEnumMixin:  # type:ignore
+        """Placeholder."""
+
 
 class OrderingEnumMeta(enum.EnumMeta):
     """Meta class for ordering enum."""
@@ -21,7 +28,11 @@ class OrderingEnumMeta(enum.EnumMeta):
         return super().__new__(metacls, cls, bases, classdict, **kwds)
 
 
-class OrderingEnum(enum.StrEnum, metaclass=OrderingEnumMeta):
+class OrderingEnum(
+    OpenAPIDocsEnumMixin,
+    enum.StrEnum,
+    metaclass=OrderingEnumMeta,
+):
     """Representation of ordering fields."""
 
     @property
