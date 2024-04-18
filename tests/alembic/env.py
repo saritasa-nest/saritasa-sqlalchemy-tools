@@ -7,7 +7,8 @@ saritasa_sqlalchemy_tools.AlembicMigrations(
     db_user="saritasa-sqlalchemy-tools-user",
     db_password="manager",
     db_host="postgres",
-    db_port=5432,
     db_name="saritasa-sqlalchemy-tools-dev",
-    query={},  # type: ignore
+    db_schema="public",
+    plugins=("alembic_postgresql_enum",),
+    query={},
 ).run()

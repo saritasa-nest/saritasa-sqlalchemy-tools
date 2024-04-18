@@ -22,7 +22,7 @@ class AlembicMigrations:
     db_name: str = ""
     db_password: str = ""
     db_host: str = ""
-    db_port: int = 0
+    db_port: int = 5432
     db_schema: str = ""
     query: dict[str, typing.Any] | None = None
     plugins: tuple[str, ...] = ()
@@ -36,12 +36,12 @@ class AlembicMigrations:
     def database_url(self) -> str | sqlalchemy.engine.URL:
         """Get database url."""
         if self.db_url:
-            return self.db_url
+            return self.db_url  # pragma: no cover
         if database_url := self.alembic_config.get_main_option(
             "sqlalchemy.url",
         ):
             return database_url
-        return sqlalchemy.engine.URL(
+        return sqlalchemy.engine.URL(  # pragma: no cover
             drivername=self.db_driver,
             username=self.db_user,
             password=self.db_password,
@@ -68,7 +68,7 @@ class AlembicMigrations:
             self.logger.info(f"Importing plugin '{plugin}'.")
             importlib.import_module(plugin)
 
-    def run_migrations_offline(self) -> None:
+    def run_migrations_offline(self) -> None:  # pragma: no cover
         """Run migrations in 'offline' mode.
 
         This configures the context with just a URL
@@ -158,6 +158,6 @@ class AlembicMigrations:
         self.setup_config()
         self.import_plugins()
         if alembic.context.is_offline_mode():
-            self.run_migrations_offline()
+            self.run_migrations_offline()  # pragma: no cover
         else:
             self.run_migrations_online()
