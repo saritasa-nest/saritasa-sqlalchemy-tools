@@ -18,7 +18,7 @@ class TestModelFactory(
 
     text = factory.Faker(
         "pystr",
-        min_chars=1,
+        min_chars=10,
         max_chars=30,
     )
     text_enum = factory.fuzzy.FuzzyChoice(

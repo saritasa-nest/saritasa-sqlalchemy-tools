@@ -1,6 +1,7 @@
 import re
 
 import pytest
+
 import sqlalchemy
 
 import saritasa_sqlalchemy_tools
@@ -412,7 +413,7 @@ async def test_search_filter(
         ],
         ordering_clauses=["id"],
     )
-    assert len(instances) == 1
+    assert len(instances) == 1, [instance.text for instance in instances]
     assert instances[0].id == test_model_list[0].id
 
 

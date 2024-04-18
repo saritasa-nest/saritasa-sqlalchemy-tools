@@ -3,6 +3,7 @@ import enum
 import typing
 
 import pydantic
+
 import sqlalchemy.dialects.postgresql
 
 from . import enums

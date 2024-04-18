@@ -1,4 +1,5 @@
 import pytest
+
 import sqlalchemy
 
 import saritasa_sqlalchemy_tools

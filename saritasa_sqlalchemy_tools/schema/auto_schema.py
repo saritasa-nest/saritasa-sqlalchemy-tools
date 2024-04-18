@@ -6,6 +6,7 @@ import typing
 
 import pydantic
 import pydantic_core
+
 import sqlalchemy.dialects.postgresql
 import sqlalchemy.orm
 
