@@ -1,77 +1,22 @@
-import asyncio
 import collections.abc
-import typing
 
 import pytest
-
-import sqlalchemy
 
 import saritasa_sqlalchemy_tools
 
 from . import factories, models, repositories
 
 
-@pytest.fixture(scope="session")
-def event_loop() -> (
-    collections.abc.Generator[
-        asyncio.AbstractEventLoop,
-        typing.Any,
-        None,
-    ]
-):
-    """Override `event_loop` fixture to change scope to `session`.
-
-    Needed for pytest-async-sqlalchemy.
-
-    """
-    loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()
+@pytest.fixture(scope="session", autouse=True)
+def anyio_backend() -> str:
+    """Specify async backend."""
+    return "asyncio"
 
 
 @pytest.fixture(scope="session")
-def database_url(request: pytest.FixtureRequest) -> str:
-    """Override database url.
-
-    Grab configs from settings and add support for pytest-xdist
-
-    """
-    worker_input = getattr(
-        request.config,
-        "workerinput",
-        {
-            "workerid": "",
-        },
-    )
-    return sqlalchemy.engine.URL(
-        drivername="postgresql+asyncpg",
-        username="saritasa-sqlalchemy-tools-user",
-        password="manager",
-        host="postgres",
-        port=5432,
-        database="_".join(
-            filter(
-                None,
-                (
-                    "saritasa-sqlalchemy-tools-dev",
-                    "test",
-                    worker_input["workerid"],
-                ),
-            ),
-        ),
-        query={},  # type: ignore
-    ).render_as_string(hide_password=False)
-
-
-@pytest.fixture(scope="session")
-def init_database() -> collections.abc.Callable[..., None]:
-    """Return callable object that will be called to init database.
-
-    Overridden fixture from `pytest-async-sqlalchemy package`.
-    https://github.com/igortg/pytest-async-sqlalchemy
-
-    """
-    return saritasa_sqlalchemy_tools.BaseModel.metadata.create_all
+def manual_database_setup() -> collections.abc.Callable[..., None]:
+    """Just to check that manual setup is called during setup."""
+    return lambda connection: print("Manual setup done")  # noqa: T201
 
 
 @pytest.fixture

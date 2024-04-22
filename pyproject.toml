@@ -29,6 +29,9 @@ classifiers = [
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 
+[tool.poetry.plugins.pytest11]
+saritasa_sqlalchemy_tools = "saritasa_sqlalchemy_tools.testing.plugin"
+
 [tool.poetry.dependencies]
 python = "^3.11"
 # The Python SQL Toolkit and Object Relational Mapper
@@ -44,11 +47,16 @@ pydantic = {version= "<3", optional = true}
 # SQLAlchemy Database Toolkit for Python
 # https://alembic.sqlalchemy.org/
 alembic = {version= "<2", optional = true}
+# AnyIO is an asynchronous networking and concurrency library
+# that works on top of either asyncio or trio.
+# https://anyio.readthedocs.io/en/stable/
+anyio = {version= "<5", optional = true}
 
 [tool.poetry.extras]
 factories = ["factory-boy"]
 auto_schema = ["pydantic"]
 migrations = ["alembic"]
+testing = ["anyio"]
 
 [tool.poetry.group.dev.dependencies]
 # Improved REPL
@@ -71,13 +79,6 @@ mypy = "^1.9.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.1.1"
-# pytest-asyncio is a pytest plugin. It facilitates testing of code that
-# uses the asyncio library.
-# https://pytest-asyncio.readthedocs.io/en/latest/
-pytest-asyncio = "^0.21.1"
-# Database testing fixtures using the SQLAlchemy asyncio API
-# https://pypi.org/project/pytest-async-sqlalchemy/
-pytest-async-sqlalchemy = "^0.2.0"
 # To prettify pytest output
 pytest-sugar = "^1.0.0"
 # Coverage.py is a tool for measuring code coverage of Python programs.
@@ -89,6 +90,9 @@ coverage = "^7.4.4"
 # and Python/asyncio.
 # https://magicstack.github.io/asyncpg/current/
 asyncpg = "^0.29.0"
+# Alembic autogenerate support for creation, alteration and deletion of enums
+# https://github.com/Pogchamp-company/alembic-postgresql-enum
+alembic-postgresql-enum = "^1.2.0"
 
 [build-system]
 requires = ["poetry-core"]
@@ -214,6 +218,7 @@ line-ending = "auto"
 [tool.mypy]
 plugins = [
   "sqlalchemy.ext.mypy.plugin",
+  "pydantic.mypy",
 ]
 # https://mypy.readthedocs.io/en/stable/running_mypy.html#missing-imports
 ignore_missing_imports = true
@@ -254,12 +259,14 @@ norecursedirs = [
     "venv",
     ".venv",
 ]
-asyncio_mode = "auto"
+sqlalchemy_database_driver="postgresql+asyncpg"
+sqlalchemy_username="saritasa-sqlalchemy-tools-user"
+sqlalchemy_password="manager"
+sqlalchemy_host="postgres"
 
 [tool.coverage.run]
 omit = [
   "saritasa_sqlalchemy_tools/session.py",
-  "saritasa_sqlalchemy_tools/alembic.py",
 ]
 
 [tool.coverage.report]
