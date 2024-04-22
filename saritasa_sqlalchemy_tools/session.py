@@ -16,6 +16,21 @@ SessionFactory: typing.TypeAlias = collections.abc.Callable[
 SessionOnConnect = collections.abc.Callable[..., None]
 
 
+def set_search_path(
+    dbapi_connection,  # noqa: ANN001
+    connection_record,  # noqa: ANN001
+    schema: str,
+) -> None:
+    """Set search path to schema on connect."""
+    existing_autocommit = dbapi_connection.autocommit
+    dbapi_connection.autocommit = True
+    cursor = dbapi_connection.cursor()
+    cursor.execute(f"SET SESSION search_path='{schema}'")
+    cursor.close()
+    dbapi_connection.commit()
+    dbapi_connection.autocommit = existing_autocommit
+
+
 def get_async_engine(
     drivername: str,
     username: str,

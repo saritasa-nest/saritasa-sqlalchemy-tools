@@ -263,6 +263,8 @@ sqlalchemy_database_driver="postgresql+asyncpg"
 sqlalchemy_username="saritasa-sqlalchemy-tools-user"
 sqlalchemy_password="manager"
 sqlalchemy_host="postgres"
+sqlalchemy_database="saritasa-sqlalchemy-tools-tests"
+sqlalchemy_schema="public"
 
 [tool.coverage.run]
 omit = [

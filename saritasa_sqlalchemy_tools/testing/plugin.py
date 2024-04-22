@@ -1,10 +1,13 @@
 import collections.abc
+import functools
 import pathlib
 
 import pytest
 
 import sqlalchemy
 import sqlalchemy.ext.asyncio
+
+from .. import session
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:
@@ -38,6 +41,10 @@ def pytest_addoption(parser: pytest.Parser) -> None:
     parser.addini(
         "sqlalchemy_database",
         "Name for database for sqlalchemy.",
+    )
+    parser.addini(
+        "sqlalchemy_schema",
+        "Schema for database for sqlalchemy.",
     )
     parser.addini(
         "alembic_config",
@@ -128,7 +135,7 @@ async def database(
 @pytest.fixture(scope="session")
 def alembic_database_setup(
     request: pytest.FixtureRequest,
-    database_url: sqlalchemy.engine.URL,
+    database: sqlalchemy.engine.URL,
 ) -> bool:
     """Set up database via alembic."""
     alembic_config_path = str(
@@ -139,12 +146,10 @@ def alembic_database_setup(
     import alembic.command
     import alembic.config
 
-    alembic_cfg = alembic.config.Config(
-        str(request.config.inicfg.get("alembic_config", "alembic.ini")),
-    )
+    alembic_cfg = alembic.config.Config(alembic_config_path)
     alembic_cfg.set_main_option(
         "sqlalchemy.url",
-        database_url.render_as_string(hide_password=False),
+        database.render_as_string(hide_password=False),
     )
     alembic.command.upgrade(alembic_cfg, "head")
     return True
@@ -158,6 +163,7 @@ def manual_database_setup() -> collections.abc.Callable[..., None] | None:
 
 @pytest.fixture(scope="session")
 async def sqlalchemy_engine(
+    request: pytest.FixtureRequest,
     database: sqlalchemy.engine.URL,
     sqlalchemy_echo: bool,
     alembic_database_setup: bool,
@@ -175,6 +181,18 @@ async def sqlalchemy_engine(
         database,
         echo=sqlalchemy_echo,
     )
+    db_schema = str(request.config.inicfg.get("sqlalchemy_schema", ""))
+    if db_schema:
+        sqlalchemy.event.listens_for(
+            target=engine.sync_engine,
+            identifier="connect",
+            insert=True,
+        )(
+            functools.partial(
+                session.set_search_path,
+                schema=db_schema,
+            ),
+        )
     try:
         if manual_database_setup:
             async with engine.begin() as connection:

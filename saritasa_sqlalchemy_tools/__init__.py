@@ -46,6 +46,7 @@ from .session import (
     get_async_db_session_context,
     get_async_engine,
     get_async_session_factory,
+    set_search_path,
 )
 
 with contextlib.suppress(ImportError):
@@ -80,6 +81,7 @@ __all__ = (
     "get_async_db_session_context",
     "get_async_engine",
     "get_async_session_factory",
+    "set_search_path",
     "Annotation",
     "AnnotationSequence",
     "BaseRepository",
