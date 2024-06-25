@@ -7,10 +7,14 @@ We use [poetry](https://github.com/python-poetry/poetry) to manage the dependenc
 To install them you would need to run `install` command:
 
 ```bash
-poetry install
+poetry install --all-extras
 ```
 
-To activate your `virtualenv` run `poetry shell`.
+To activate your `virtualenv` run command.
+
+```bash
+poetry shell
+````
 
 ## Style checks
 

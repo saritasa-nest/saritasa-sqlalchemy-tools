@@ -5,14 +5,20 @@ import importlib
 import os
 import typing
 
+FP = typing.ParamSpec("FP")  # Function Parameters
+RV = typing.TypeVar("RV")  # Returned Value
+
 
 def tracker(
-    func: collections.abc.Callable[..., typing.Any],
-) -> typing.Any:
+    func: collections.abc.Callable[FP, RV],
+) -> collections.abc.Callable[FP, RV]:
     """Create a placeholder for performance tracker."""
 
     @functools.wraps(func)
-    def wrapper_tracker(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
+    def wrapper_tracker(
+        *args: FP.args,
+        **kwargs: FP.kwargs,
+    ) -> RV:
         return func(*args, **kwargs)
 
     return wrapper_tracker
