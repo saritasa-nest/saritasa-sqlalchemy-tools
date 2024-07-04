@@ -139,8 +139,8 @@ class ModelAutoSchema:
         generated_fields: dict[str, PydanticFieldConfig] = {}
         validators: dict[str, typing.Any] = {}
         for field in cls.Meta.fields:
-            extra_field_config = extra_fields_config.get(field, {})
             if isinstance(field, str):
+                extra_field_config = extra_fields_config.get(field, {})
                 generated_fields[field] = cls._generate_field(
                     model=cls.Meta.model,
                     field=field,
@@ -155,6 +155,7 @@ class ModelAutoSchema:
                 continue
             if isinstance(field, tuple) and len(field) == 2:
                 field_name, field_type = field
+                extra_field_config = extra_fields_config.get(field_name, {})
                 generated_fields[field_name] = (
                     cls._generate_field_with_custom_type(
                         model=cls.Meta.model,
@@ -263,9 +264,15 @@ class ModelAutoSchema:
                     if is_nullable
                     else field_type_generated
                 ),
-                pydantic_core.PydanticUndefined,
+                extra_field_config.get(
+                    "default",
+                    pydantic_core.PydanticUndefined,
+                ),
             )
-        return field_type, pydantic_core.PydanticUndefined
+        return field_type, extra_field_config.get(
+            "default",
+            pydantic_core.PydanticUndefined,
+        )
 
     @classmethod
     def _get_db_types_mapping(
@@ -337,7 +344,10 @@ class ModelAutoSchema:
                 if is_nullable
                 else field_type_generated
             ),
-            pydantic_core.PydanticUndefined,
+            extra_field_config.get(
+                "default",
+                pydantic_core.PydanticUndefined,
+            ),
         )
 
     @classmethod
