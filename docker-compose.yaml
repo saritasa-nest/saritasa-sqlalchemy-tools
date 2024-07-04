@@ -1,4 +1,3 @@
-version: '3.7'
 name: "saritasa-sqlalchemy-tools"
 
 services:
