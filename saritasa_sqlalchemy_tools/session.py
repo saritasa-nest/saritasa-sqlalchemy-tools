@@ -135,9 +135,9 @@ async def get_async_db_session(
     )() as session:
         try:
             yield session
-        except Exception as error:
+        except Exception:
             await session.rollback()
-            raise error
+            raise
         else:
             await session.commit()
 

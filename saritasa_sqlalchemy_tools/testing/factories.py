@@ -77,15 +77,13 @@ class AsyncSQLAlchemyModelFactory(
         **kwargs,
     ) -> list[models.BaseModelT]:
         """Create several instances."""
-        instances: list[models.BaseModelT] = []
-        for _ in range(size):
-            instances.append(
-                await cls.create_async(
-                    session=session,
-                    **kwargs,
-                ),
+        return [
+            await cls.create_async(
+                session=session,
+                **kwargs,
             )
-        return instances
+            for _ in range(size)
+        ]
 
     @classmethod
     async def _async_run_sub_factories(
