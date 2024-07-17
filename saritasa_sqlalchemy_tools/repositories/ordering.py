@@ -43,6 +43,6 @@ class OrderingEnum(
         return self
 
 
-SQLOrderingClause = str | sqlalchemy.ColumnExpressionArgument[str]
+SQLOrderingClause = str | sqlalchemy.ColumnExpressionArgument[typing.Any]
 OrderingClause = SQLOrderingClause | OrderingEnum
 OrderingClauses: typing.TypeAlias = collections.abc.Sequence[OrderingClause]
