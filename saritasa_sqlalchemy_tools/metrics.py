@@ -29,6 +29,6 @@ with contextlib.suppress(KeyError):  # pragma: no cover
         "SARITASA_SQLALCHEMY_TOOLS_METRIC_TRACKER"
     ]
     *module, tracker_name = metric_tracker_path.split(".")
-    tracker = getattr(importlib.import_module(".".join(module)), tracker_name)  # noqa: F811
+    tracker = getattr(importlib.import_module(".".join(module)), tracker_name)
 
 __all__ = ("tracker",)
