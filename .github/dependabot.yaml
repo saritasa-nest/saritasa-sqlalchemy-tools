@@ -7,7 +7,7 @@ updates:
     interval: monthly
     time: "00:00"
   groups:
-    all:
+    github-actions:
       patterns:
       - "*"
 - package-ecosystem: pip
@@ -16,6 +16,6 @@ updates:
     interval: weekly
     time: "00:00"
   groups:
-    all:
+    pip:
       patterns:
       - "*"
