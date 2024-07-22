@@ -310,6 +310,47 @@ async def test_filter_in(
         False,
     ],
 )
+async def test_filter_in_as_kwargs(
+    test_model_list: list[models.TestModel],
+    repository: repositories.TestModelRepository,
+    reuse_select_statement: bool,
+) -> None:
+    """Test filter `in` as kwargs."""
+    filtered_models = list(
+        filter(
+            lambda instance: instance.text
+            in [test_model_list[0].text, test_model_list[3].text],
+            test_model_list,
+        ),
+    )
+    kwargs = {
+        "text__in": [test_model_list[0].text, test_model_list[3].text],
+    }
+    if reuse_select_statement:
+        select_statement = repository.get_filter_statement(
+            None,
+            **kwargs,
+        )
+        instances = await repository.fetch_all(
+            statement=select_statement,
+            ordering_clauses=["id"],
+        )
+    else:
+        instances = await repository.fetch_all(
+            **kwargs,  # type: ignore
+            ordering_clauses=["id"],
+        )
+    assert instances[0].id == filtered_models[0].id
+    assert instances[1].id == filtered_models[1].id
+
+
+@pytest.mark.parametrize(
+    "reuse_select_statement",
+    [
+        True,
+        False,
+    ],
+)
 async def test_filter_gte(
     test_model_list: list[models.TestModel],
     repository: repositories.TestModelRepository,

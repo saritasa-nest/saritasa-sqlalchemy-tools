@@ -221,9 +221,14 @@ class BaseRepository(
             select_statement = statement
         else:
             select_statement = self.select_statement
+        processed_where_filters = self.process_where_filters(*where)
+        processed_filters_by, left_out_filters_by = (
+            self.process_filters_by_filters(**filters_by)
+        )
         return select_statement.where(
-            *self.process_where_filters(*where),
-        ).filter_by(**filters_by)
+            *processed_where_filters,
+            *processed_filters_by,
+        ).filter_by(**left_out_filters_by)
 
     @classmethod
     @metrics.tracker
@@ -241,6 +246,30 @@ class BaseRepository(
                 continue
             processed_where_filters.append(where_filter)
         return processed_where_filters
+
+    @classmethod
+    @metrics.tracker
+    def process_filters_by_filters(
+        cls,
+        **filters_by: typing.Any,
+    ) -> tuple[
+        collections.abc.Sequence[filters.SQLWhereFilter],
+        dict[str, typing.Any],
+    ]:
+        """Process where filters."""
+        processed_where_filters: list[filters.SQLWhereFilter] = []
+        processed_filters_by: dict[str, typing.Any] = {}
+        for field, value in filters_by.items():
+            if "__" in field:
+                processed_where_filters.append(
+                    filters.Filter(
+                        field=field,
+                        value=value,
+                    ).transform_filter(cls.model),  # type: ignore
+                )
+            else:
+                processed_filters_by[field] = value
+        return processed_where_filters, processed_filters_by
 
     @metrics.tracker
     def get_order_statement(
