@@ -510,12 +510,21 @@ class BaseRepository(
         **filters_by: typing.Any,
     ) -> int:
         """Get count of entries."""
+        processed_where_filters = self.process_where_filters(*where)
+        processed_filters_by, left_out_filters_by = (
+            self.process_filters_by_filters(**filters_by)
+        )
         return (
             await metrics.tracker(self.db_session.scalar)(
                 sqlalchemy.select(sqlalchemy.func.count())
                 .select_from(self.model)
-                .where(*self.process_where_filters(*where))
-                .filter_by(**filters_by),
+                .where(
+                    *processed_where_filters,
+                    *processed_filters_by,
+                )
+                .filter_by(
+                    **left_out_filters_by,
+                ),
             )
         ) or 0
 
@@ -526,14 +535,19 @@ class BaseRepository(
         **filters_by: typing.Any,
     ) -> bool:
         """Check existence of entries."""
+        processed_where_filters = self.process_where_filters(*where)
+        processed_filters_by, left_out_filters_by = (
+            self.process_filters_by_filters(**filters_by)
+        )
         return (
             await metrics.tracker(self.db_session.scalar)(
                 sqlalchemy.select(
                     sqlalchemy.sql.exists(
                         self.select_statement.where(
-                            *self.process_where_filters(*where),
+                            *processed_where_filters,
+                            *processed_filters_by,
                         ).filter_by(
-                            **filters_by,
+                            **left_out_filters_by,
                         ),
                     ),
                 ),
