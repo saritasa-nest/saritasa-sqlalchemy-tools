@@ -1,3 +1,4 @@
+import contextlib
 import datetime
 import typing
 
@@ -58,11 +59,12 @@ class BaseModel(
     @metrics.tracker
     def as_dict(self) -> dict[str, typing.Any]:
         """Convert model to dict."""
-        return {
-            column_name: getattr(self, column_name)
-            for column in self.__table__.columns
-            if (column_name := column.name)
-        }
+        data = {}
+        for column in self.__table__.columns:
+            if column_name := column.name:
+                with contextlib.suppress(sqlalchemy.exc.MissingGreenlet):
+                    data[column_name] = getattr(self, column_name)
+        return data
 
     @property
     def pk(self) -> typing.Any:
