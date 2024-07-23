@@ -100,11 +100,18 @@ class BaseRepository(
         **filters_by: typing.Any,
     ) -> None:
         """Delete batch of objects from db."""
+        processed_where_filters = self.process_where_filters(*where)
+        processed_filters_by, left_out_filters_by = (
+            self.process_filters_by_filters(**filters_by)
+        )
         await self.db_session.execute(
             statement=(
                 sqlalchemy.sql.delete(self.model)
-                .where(*self.process_where_filters(*where))
-                .filter_by(**filters_by)
+                .where(
+                    *processed_where_filters,
+                    *processed_filters_by,
+                )
+                .filter_by(**left_out_filters_by)
             ),
         )
 
