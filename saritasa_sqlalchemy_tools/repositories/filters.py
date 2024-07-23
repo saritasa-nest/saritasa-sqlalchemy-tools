@@ -103,6 +103,10 @@ class Filter:
         value: FilterType,
     ) -> SQLWhereFilter:
         """Transform simple filter for sqlalchemy."""
+        is_not = False
+        if filter_arg.startswith("not_"):
+            is_not = True
+            _, filter_arg = filter_arg.split("not_")
         filter_args_mapping = {
             "is": "is_",
             "in": "in_",
@@ -122,6 +126,8 @@ class Filter:
         filter_operator = getattr(field, filter_args_mapping[filter_arg])(
             value,
         )
+        if is_not:
+            return sqlalchemy.not_(filter_operator)
         return filter_operator
 
 
