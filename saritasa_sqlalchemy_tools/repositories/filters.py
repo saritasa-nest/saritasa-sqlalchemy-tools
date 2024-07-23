@@ -40,6 +40,7 @@ class Filter:
 
     field: str
     value: FilterType
+    exclude: bool = False
 
     @metrics.tracker
     def transform_filter(
@@ -48,26 +49,31 @@ class Filter:
     ) -> SQLWhereFilter:
         """Transform filter valid for sqlalchemy."""
         field_name, *filter_arg = self.field.split("__")
+        filter_object: SQLWhereFilter
         if isinstance(
             getattr(model, field_name).property,
             sqlalchemy.orm.Relationship,
         ):
-            return self.transform_relationship(
+            filter_object = self.transform_relationship(
                 field_name=field_name,
                 filter_arg=filter_arg,
                 model=model,
                 value=self.value,
             )
-        if len(filter_arg) > 1:
+        elif len(filter_arg) > 1:
             raise ValueError(
                 "Long filter args only supported for relationships!",
             )
-        return self.transform_simple_filter(
-            field_name=field_name,
-            filter_arg=filter_arg[0],
-            model=model,
-            value=self.value,
-        )
+        else:
+            filter_object = self.transform_simple_filter(
+                field_name=field_name,
+                filter_arg=filter_arg[0],
+                model=model,
+                value=self.value,
+            )
+        if self.exclude:
+            return sqlalchemy.not_(filter_object)
+        return filter_object
 
     def transform_relationship(
         self,

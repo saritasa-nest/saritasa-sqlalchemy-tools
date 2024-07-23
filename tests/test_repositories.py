@@ -310,6 +310,55 @@ async def test_filter_in(
         False,
     ],
 )
+async def test_filter_in_exclude(
+    test_model_list: list[models.TestModel],
+    repository: repositories.TestModelRepository,
+    reuse_select_statement: bool,
+) -> None:
+    """Test filter `in` with exclude."""
+    filtered_models = list(
+        filter(
+            lambda instance: instance.text
+            in [test_model_list[0].text, test_model_list[3].text],
+            test_model_list,
+        ),
+    )
+    args = {
+        "where": [
+            saritasa_sqlalchemy_tools.Filter(
+                field="text__in",
+                value=[test_model_list[0].text, test_model_list[3].text],
+                exclude=True,
+            ),
+        ],
+    }
+    if reuse_select_statement:
+        select_statement = repository.get_filter_statement(
+            None,
+            *args["where"],
+        )
+        instances = await repository.fetch_all(
+            statement=select_statement,
+            ordering_clauses=["id"],
+        )
+    else:
+        instances = await repository.fetch_all(
+            **args,  # type: ignore
+            ordering_clauses=["id"],
+        )
+    assert len(instances) == len(test_model_list) - len(filtered_models)
+    instance_ids = [instance.id for instance in instances]
+    assert filtered_models[0].id not in instance_ids
+    assert filtered_models[1].id not in instance_ids
+
+
+@pytest.mark.parametrize(
+    "reuse_select_statement",
+    [
+        True,
+        False,
+    ],
+)
 async def test_filter_in_as_kwargs(
     test_model_list: list[models.TestModel],
     repository: repositories.TestModelRepository,
