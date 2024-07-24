@@ -545,6 +545,7 @@ class BaseRepository(
     @metrics.tracker
     async def count(
         self,
+        from_statement: models.SelectStatement[typing.Any] | None = None,
         where: filters.WhereFilters = (),
         **filters_by: typing.Any,
     ) -> int:
@@ -553,9 +554,11 @@ class BaseRepository(
         processed_filters_by, left_out_filters_by = (
             self.process_filters_by_filters(**filters_by)
         )
-        return (
-            await metrics.tracker(self.db_session.scalar)(
-                sqlalchemy.select(sqlalchemy.func.count())
+        if from_statement is None:
+            statement = (
+                sqlalchemy.select(
+                    sqlalchemy.func.count(),
+                )
                 .select_from(self.model)
                 .where(
                     *processed_where_filters,
@@ -563,9 +566,22 @@ class BaseRepository(
                 )
                 .filter_by(
                     **left_out_filters_by,
-                ),
+                )
             )
-        ) or 0
+        else:
+            statement = sqlalchemy.select(
+                sqlalchemy.func.count(),
+            ).select_from(
+                from_statement.where(
+                    *processed_where_filters,
+                    *processed_filters_by,
+                )
+                .filter_by(
+                    **left_out_filters_by,
+                )
+                .subquery(),
+            )
+        return (await metrics.tracker(self.db_session.scalar)(statement)) or 0
 
     @metrics.tracker
     async def exists(

@@ -1,3 +1,4 @@
+import random
 import re
 
 import pytest
@@ -492,13 +493,13 @@ async def test_filter_m2m(
     """Test filter related to m2m fields."""
     await factories.M2MModelFactory.create_batch_async(
         session=repository.db_session,
-        size=5,
+        size=random.randint(2, 10),
         test_model_id=test_model.pk,
         related_model_id=test_model.related_model_id,
     )
     await factories.M2MModelFactory.create_batch_async(
         session=repository.db_session,
-        size=5,
+        size=random.randint(2, 10),
     )
 
     args = {
@@ -565,7 +566,7 @@ async def test_annotation(
     """Test annotations loading."""
     await factories.RelatedModelFactory.create_batch_async(
         session=repository.db_session,
-        size=5,
+        size=random.randint(2, 10),
         test_model_id=test_model.pk,
     )
     annotations = (models.TestModel.related_models_count,)
@@ -642,7 +643,7 @@ async def test_filter_related_models_has(
     """Test filtration thought related models via one-to-many."""
     await factories.RelatedModelFactory.create_batch_async(
         session=repository.db_session,
-        size=5,
+        size=random.randint(2, 10),
     )
     related_model = await factories.RelatedModelFactory.create_async(
         session=repository.db_session,
@@ -673,11 +674,11 @@ async def test_filter_related_models_any(
     """Test filtration thought related models via many-to-one."""
     await factories.RelatedModelFactory.create_batch_async(
         session=repository.db_session,
-        size=5,
+        size=random.randint(2, 10),
     )
     related_models = await factories.RelatedModelFactory.create_batch_async(
         session=repository.db_session,
-        size=5,
+        size=random.randint(2, 10),
         test_model_id=test_model.pk,
     )
     new_test_model = await factories.TestModelFactory.create_async(
@@ -725,7 +726,7 @@ async def test_row_mapping(
             obj.number
             for obj in await factories.TestModelFactory.create_batch_async(
                 session=repository.db_session,
-                size=5,
+                size=random.randint(2, 10),
                 text="1",
             )
         ),
@@ -733,7 +734,7 @@ async def test_row_mapping(
             obj.number
             for obj in await factories.TestModelFactory.create_batch_async(
                 session=repository.db_session,
-                size=5,
+                size=random.randint(2, 10),
                 text="2",
             )
         ),
@@ -750,3 +751,35 @@ async def test_row_mapping(
             result_row["num_sum"]
             == expected_results[result_row["group_field"]]
         )
+
+
+async def test_subquery_count(
+    repository: repositories.TestModelRepository,
+) -> None:
+    """Test count via subquery."""
+    await factories.TestModelFactory.create_batch_async(
+        session=repository.db_session,
+        size=random.randint(2, 10),
+        text="1",
+    )
+    await factories.TestModelFactory.create_batch_async(
+        session=repository.db_session,
+        size=random.randint(2, 10),
+        text="2",
+    )
+    from_statement = sqlalchemy.select(
+        models.TestModel.text.label("group_field"),
+    ).group_by(models.TestModel.text)
+    assert (
+        await repository.count(
+            from_statement=from_statement,
+        )
+        == 2
+    )
+    assert (
+        await repository.count(
+            from_statement=from_statement,
+            text="1",
+        )
+        == 1
+    )
