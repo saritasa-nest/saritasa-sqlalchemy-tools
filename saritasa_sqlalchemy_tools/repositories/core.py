@@ -197,9 +197,9 @@ class BaseRepository(
     @metrics.tracker
     def get_annotated_statement(
         self,
-        statement: models.SelectStatement[models.BaseModelT] | None = None,
+        statement: models.SelectStatement[typing.Any] | None = None,
         *annotations: types.Annotation,
-    ) -> models.SelectStatement[models.BaseModelT]:
+    ) -> models.SelectStatement[typing.Any]:
         """Pick annotations which should be returned."""
         if statement is not None:
             select_statement = statement
@@ -219,10 +219,10 @@ class BaseRepository(
     @metrics.tracker
     def get_filter_statement(
         self,
-        statement: models.SelectStatement[models.BaseModelT] | None = None,
+        statement: models.SelectStatement[typing.Any] | None = None,
         *where: filters.WhereFilter,
         **filters_by: typing.Any,
-    ) -> models.SelectStatement[models.BaseModelT]:
+    ) -> models.SelectStatement[typing.Any]:
         """Get statement with filtering."""
         if statement is not None:
             select_statement = statement
@@ -281,9 +281,9 @@ class BaseRepository(
     @metrics.tracker
     def get_order_statement(
         self,
-        statement: models.SelectStatement[models.BaseModelT] | None = None,
+        statement: models.SelectStatement[typing.Any] | None = None,
         *clauses: ordering.OrderingClause,
-    ) -> models.SelectStatement[models.BaseModelT]:
+    ) -> models.SelectStatement[typing.Any]:
         """Get statement with ordering."""
         if statement is not None:
             select_statement = statement
@@ -311,10 +311,10 @@ class BaseRepository(
     @metrics.tracker
     def get_pagination_statement(
         self,
-        statement: models.SelectStatement[models.BaseModelT] | None = None,
+        statement: models.SelectStatement[typing.Any] | None = None,
         offset: int | None = None,
         limit: int | None = None,
-    ) -> models.SelectStatement[models.BaseModelT]:
+    ) -> models.SelectStatement[typing.Any]:
         """Get statement with pagination."""
         if statement is not None:
             select_statement = statement
@@ -329,9 +329,9 @@ class BaseRepository(
     @metrics.tracker
     def get_joined_load_statement(
         self,
-        statement: models.SelectStatement[models.BaseModelT] | None = None,
+        statement: models.SelectStatement[typing.Any] | None = None,
         *targets: types.LazyLoaded,
-    ) -> models.SelectStatement[models.BaseModelT]:
+    ) -> models.SelectStatement[typing.Any]:
         """Get statement which will load related models."""
         if statement is not None:
             select_statement = statement
@@ -354,9 +354,9 @@ class BaseRepository(
     @metrics.tracker
     def get_select_in_load_statement(
         self,
-        statement: models.SelectStatement[models.BaseModelT] | None = None,
+        statement: models.SelectStatement[typing.Any] | None = None,
         *targets: types.LazyLoaded,
-    ) -> models.SelectStatement[models.BaseModelT]:
+    ) -> models.SelectStatement[typing.Any]:
         """Get statement which will load related models separately."""
         if statement is not None:
             select_statement = statement
@@ -379,7 +379,7 @@ class BaseRepository(
     @metrics.tracker
     def get_fetch_statement(
         self,
-        statement: models.SelectStatement[models.BaseModelT] | None = None,
+        statement: models.SelectStatement[typing.Any] | None = None,
         offset: int | None = None,
         limit: int | None = None,
         joined_load: types.LazyLoadedSequence = (),
@@ -388,7 +388,7 @@ class BaseRepository(
         ordering_clauses: ordering.OrderingClauses = (),
         where: filters.WhereFilters = (),
         **filters_by: typing.Any,
-    ) -> models.SelectStatement[models.BaseModelT]:
+    ) -> models.SelectStatement[typing.Any]:
         """Prepare statement for fetching."""
         fetch_statement = self.get_joined_load_statement(
             statement,
@@ -421,7 +421,7 @@ class BaseRepository(
     @metrics.tracker
     async def fetch(
         self,
-        statement: models.SelectStatement[models.BaseModelT] | None = None,
+        statement: models.SelectStatement[typing.Any] | None = None,
         unique: bool = True,
         offset: int | None = None,
         limit: int | None = None,
@@ -451,9 +451,41 @@ class BaseRepository(
         return scalar_result
 
     @metrics.tracker
+    async def fetch_rows(
+        self,
+        statement: sqlalchemy.Select[typing.Any],
+        unique: bool = True,
+        offset: int | None = None,
+        limit: int | None = None,
+        joined_load: types.LazyLoadedSequence = (),
+        select_in_load: types.LazyLoadedSequence = (),
+        annotations: types.AnnotationSequence = (),
+        ordering_clauses: ordering.OrderingClauses = (),
+        where: filters.WhereFilters = (),
+        **filters_by: typing.Any,
+    ) -> collections.abc.Sequence[sqlalchemy.RowMapping]:
+        """Fetch row mapping."""
+        row_mapping_result = await metrics.tracker(self.db_session.execute)(
+            statement=self.get_fetch_statement(
+                statement=statement,
+                offset=offset,
+                limit=limit,
+                joined_load=joined_load,
+                select_in_load=select_in_load,
+                annotations=annotations,
+                ordering_clauses=ordering_clauses,
+                where=where,
+                **filters_by,
+            ),
+        )
+        if unique:
+            row_mapping_result = row_mapping_result.unique()
+        return row_mapping_result.mappings().all()
+
+    @metrics.tracker
     async def fetch_all(
         self,
-        statement: models.SelectStatement[models.BaseModelT] | None = None,
+        statement: models.SelectStatement[typing.Any] | None = None,
         unique: bool = True,
         offset: int | None = None,
         limit: int | None = None,
@@ -483,7 +515,7 @@ class BaseRepository(
     @metrics.tracker
     async def fetch_first(
         self,
-        statement: models.SelectStatement[models.BaseModelT] | None = None,
+        statement: models.SelectStatement[typing.Any] | None = None,
         unique: bool = True,
         offset: int | None = None,
         limit: int | None = None,
@@ -565,7 +597,7 @@ class BaseRepository(
     async def values(
         self,
         field: types.ColumnField[types.ColumnTypeT],
-        statement: models.SelectStatement[models.BaseModelT] | None = None,
+        statement: models.SelectStatement[typing.Any] | None = None,
         joined_load: types.LazyLoadedSequence = (),
         select_in_load: types.LazyLoadedSequence = (),
         annotations: types.AnnotationSequence = (),

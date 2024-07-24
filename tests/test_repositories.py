@@ -714,3 +714,39 @@ async def test_filter_invalid_filter_arg(
                 ),
             ),
         )
+
+
+async def test_row_mapping(
+    repository: repositories.TestModelRepository,
+) -> None:
+    """Test fetch row mapping."""
+    expected_results = {
+        "1": sum(
+            obj.number
+            for obj in await factories.TestModelFactory.create_batch_async(
+                session=repository.db_session,
+                size=5,
+                text="1",
+            )
+        ),
+        "2": sum(
+            obj.number
+            for obj in await factories.TestModelFactory.create_batch_async(
+                session=repository.db_session,
+                size=5,
+                text="2",
+            )
+        ),
+    }
+    result = await repository.fetch_rows(
+        statement=sqlalchemy.select(
+            models.TestModel.text.label("group_field"),
+            sqlalchemy.func.sum(models.TestModel.number).label("num_sum"),
+        ).group_by(models.TestModel.text),
+        ordering_clauses=("group_field",),
+    )
+    for result_row in result:
+        assert (
+            result_row["num_sum"]
+            == expected_results[result_row["group_field"]]
+        )
