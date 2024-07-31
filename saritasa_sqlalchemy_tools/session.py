@@ -14,6 +14,11 @@ SessionFactory: typing.TypeAlias = collections.abc.Callable[
     collections.abc.AsyncIterator[Session],
 ]
 SessionOnConnect = collections.abc.Callable[..., None]
+SessionContextManager = contextlib.AbstractAsyncContextManager[Session]
+SessionContextManagerGetter = collections.abc.Callable[
+    [],
+    SessionContextManager,
+]
 
 
 def set_search_path(
@@ -104,6 +109,7 @@ def get_async_session_factory(
     )
 
 
+@contextlib.asynccontextmanager
 async def get_async_db_session(
     drivername: str,
     username: str,
@@ -140,39 +146,3 @@ async def get_async_db_session(
             raise
         else:
             await session.commit()
-
-
-@contextlib.asynccontextmanager
-async def get_async_db_session_context(
-    drivername: str,
-    username: str,
-    password: str,
-    host: str,
-    port: int,
-    database: str,
-    query: dict[str, tuple[str, ...] | str],
-    echo: bool = False,
-    on_connect: collections.abc.Sequence[SessionOnConnect] = (),
-    autocommit: bool = False,
-    autoflush: bool = False,
-    expire_on_commit: bool = False,
-) -> collections.abc.AsyncIterator[Session]:
-    """Init db session."""
-    db_iterator = get_async_db_session(
-        drivername=drivername,
-        username=username,
-        password=password,
-        host=host,
-        port=port,
-        database=database,
-        on_connect=on_connect,
-        echo=echo,
-        autocommit=autocommit,
-        autoflush=autoflush,
-        expire_on_commit=expire_on_commit,
-        query=query,
-    )
-    try:
-        yield await anext(db_iterator)  # type: ignore
-    finally:
-        await anext(db_iterator, None)

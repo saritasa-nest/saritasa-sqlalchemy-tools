@@ -41,9 +41,10 @@ from .repositories import (
 )
 from .session import (
     Session,
+    SessionContextManager,
+    SessionContextManagerGetter,
     SessionFactory,
     get_async_db_session,
-    get_async_db_session_context,
     get_async_engine,
     get_async_session_factory,
     set_search_path,
@@ -76,9 +77,10 @@ __all__ = (
     "AsyncSQLAlchemyOptions",
     "DateRangeFactory",
     "Session",
+    "SessionContextManager",
+    "SessionContextManagerGetter",
     "SessionFactory",
     "get_async_db_session",
-    "get_async_db_session_context",
     "get_async_engine",
     "get_async_session_factory",
     "set_search_path",
