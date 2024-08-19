@@ -295,20 +295,20 @@ tests = ["asttokens (>=2.1.0)", "coverage", "coverage-enable-subprocess", "ipyth
 
 [[package]]
 name = "factory-boy"
-version = "3.3.0"
+version = "3.3.1"
 description = "A versatile test fixtures replacement based on thoughtbot's factory_bot for Ruby."
 optional = true
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "factory_boy-3.3.0-py2.py3-none-any.whl", hash = "sha256:a2cdbdb63228177aa4f1c52f4b6d83fab2b8623bf602c7dedd7eb83c0f69c04c"},
-    {file = "factory_boy-3.3.0.tar.gz", hash = "sha256:bc76d97d1a65bbd9842a6d722882098eb549ec8ee1081f9fb2e8ff29f0c300f1"},
+    {file = "factory_boy-3.3.1-py2.py3-none-any.whl", hash = "sha256:7b1113c49736e1e9995bc2a18f4dbf2c52cf0f841103517010b1d825712ce3ca"},
+    {file = "factory_boy-3.3.1.tar.gz", hash = "sha256:8317aa5289cdfc45f9cae570feb07a6177316c82e34d14df3c2e1f22f26abef0"},
 ]
 
 [package.dependencies]
 Faker = ">=0.7.0"
 
 [package.extras]
-dev = ["Django", "Pillow", "SQLAlchemy", "coverage", "flake8", "isort", "mongoengine", "sqlalchemy-utils", "tox", "wheel (>=0.32.0)", "zest.releaser[recommended]"]
+dev = ["Django", "Pillow", "SQLAlchemy", "coverage", "flake8", "isort", "mongoengine", "mongomock", "mypy", "tox", "wheel (>=0.32.0)", "zest.releaser[recommended]"]
 doc = ["Sphinx", "sphinx-rtd-theme", "sphinxcontrib-spelling"]
 
 [[package]]
@@ -1133,13 +1133,13 @@ jupyter = ["ipywidgets (>=7.5.1,<9)"]
 
 [[package]]
 name = "saritasa-invocations"
-version = "1.1.1"
+version = "1.2.0"
 description = "Collection of invoke commands used by Saritasa"
 optional = false
 python-versions = "<4.0,>=3.10"
 files = [
-    {file = "saritasa_invocations-1.1.1-py3-none-any.whl", hash = "sha256:5fa889d6ce75b029f43b3c316561995ed5163e88bf14612b7b1bd4835feb6395"},
-    {file = "saritasa_invocations-1.1.1.tar.gz", hash = "sha256:61033debaffa440c9f69552d7c9e9813cfa12dfd99adad3c07cfb66f37cb0476"},
+    {file = "saritasa_invocations-1.2.0-py3-none-any.whl", hash = "sha256:7a18ba2297c52b999496cb52c4e7ddab6dc76bd8492c0b4fc9a3b36bdaf5bb3d"},
+    {file = "saritasa_invocations-1.2.0.tar.gz", hash = "sha256:cabc7ce70d44fd9d45ae56c1968c7a27c14870585b7d657f5c6ed2b804f7481d"},
 ]
 
 [package.dependencies]
@@ -1358,4 +1358,4 @@ testing = ["anyio"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "246e260227a8855a91c6fe1380bdeb47049c486d6849b8f1ae810e17d5ce187c"
+content-hash = "e3124ed3b384ab5eb9eef9ff1887dd2b4785ccbf9f4bd2f496aa2a6202c79773"
