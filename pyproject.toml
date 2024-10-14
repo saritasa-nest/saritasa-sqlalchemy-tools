@@ -61,10 +61,10 @@ testing = ["anyio"]
 [tool.poetry.group.dev.dependencies]
 # Improved REPL
 ipdb = "^0.13.13"
-ipython = "^8.27.0"
+ipython = "^8.28.0"
 # A framework for managing and maintaining multi-language pre-commit hooks.
 # https://pre-commit.com/
-pre-commit = "^3.8.0"
+pre-commit = "^4.0.1"
 # Collection of invoke commands used by Saritasa
 # Invoke is a Python (2.7 and 3.4+) task execution tool & library,
 # drawing inspiration from various sources to arrive at a powerful & clean feature set.
@@ -85,7 +85,7 @@ pytest-sugar = "^1.0.0"
 # It monitors your program, noting which parts of the code have been executed,
 # then analyzes the source to identify code that could have been executed but was not.
 # https://coverage.readthedocs.io/en/latest/
-coverage = "^7.6.1"
+coverage = "^7.6.3"
 # asyncpg is a database interface library designed specifically for PostgreSQL
 # and Python/asyncio.
 # https://magicstack.github.io/asyncpg/current/
