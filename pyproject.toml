@@ -61,7 +61,7 @@ testing = ["anyio"]
 [tool.poetry.group.dev.dependencies]
 # Improved REPL
 ipdb = "^0.13.13"
-ipython = "^8.31.0"
+ipython = "^8.32.0"
 # A framework for managing and maintaining multi-language pre-commit hooks.
 # https://pre-commit.com/
 pre-commit = "^3.8.0"
@@ -92,7 +92,7 @@ coverage = "^7.6.10"
 asyncpg = "^0.30.0"
 # Alembic autogenerate support for creation, alteration and deletion of enums
 # https://github.com/Pogchamp-company/alembic-postgresql-enum
-alembic-postgresql-enum = "^1.5.0"
+alembic-postgresql-enum = "^1.6.1"
 
 [build-system]
 requires = ["poetry-core"]
