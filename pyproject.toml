@@ -61,7 +61,7 @@ testing = ["anyio"]
 [tool.poetry.group.dev.dependencies]
 # Improved REPL
 ipdb = "^0.13.13"
-ipython = "^8.32.0"
+ipython = "^8.33.0"
 # A framework for managing and maintaining multi-language pre-commit hooks.
 # https://pre-commit.com/
 pre-commit = "^3.8.0"
@@ -78,7 +78,7 @@ saritasa_invocations = "^1.3.1"
 mypy = "^1.15.0"
 
 [tool.poetry.group.test.dependencies]
-pytest = "^8.3.4"
+pytest = "^8.3.5"
 # To prettify pytest output
 pytest-sugar = "^1.0.0"
 # Coverage.py is a tool for measuring code coverage of Python programs.
