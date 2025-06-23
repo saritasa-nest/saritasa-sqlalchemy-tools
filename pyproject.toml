@@ -75,10 +75,10 @@ saritasa_invocations = "^1.4.0"
 [tool.poetry.group.linters.dependencies]
 # Mypy is a static type checker for Python.
 # https://mypy.readthedocs.io/en/stable/
-mypy = "^1.16.0"
+mypy = "^1.16.1"
 
 [tool.poetry.group.test.dependencies]
-pytest = "^8.4.0"
+pytest = "^8.4.1"
 # To prettify pytest output
 pytest-sugar = "^1.0.0"
 # Coverage.py is a tool for measuring code coverage of Python programs.
