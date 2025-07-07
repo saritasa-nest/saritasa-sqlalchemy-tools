@@ -61,7 +61,7 @@ testing = ["anyio"]
 [tool.poetry.group.dev.dependencies]
 # Improved REPL
 ipdb = "^0.13.13"
-ipython = "^9.3.0"
+ipython = "^9.4.0"
 # A framework for managing and maintaining multi-language pre-commit hooks.
 # https://pre-commit.com/
 pre-commit = "^3.8.0"
@@ -85,7 +85,7 @@ pytest-sugar = "^1.0.0"
 # It monitors your program, noting which parts of the code have been executed,
 # then analyzes the source to identify code that could have been executed but was not.
 # https://coverage.readthedocs.io/en/latest/
-coverage = "^7.9.1"
+coverage = "^7.9.2"
 # asyncpg is a database interface library designed specifically for PostgreSQL
 # and Python/asyncio.
 # https://magicstack.github.io/asyncpg/current/
