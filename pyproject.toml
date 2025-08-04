@@ -75,7 +75,7 @@ saritasa_invocations = "^1.5.0"
 [tool.poetry.group.linters.dependencies]
 # Mypy is a static type checker for Python.
 # https://mypy.readthedocs.io/en/stable/
-mypy = "^1.17.0"
+mypy = "^1.17.1"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.4.1"
@@ -85,7 +85,7 @@ pytest-sugar = "^1.0.0"
 # It monitors your program, noting which parts of the code have been executed,
 # then analyzes the source to identify code that could have been executed but was not.
 # https://coverage.readthedocs.io/en/latest/
-coverage = "^7.10.1"
+coverage = "^7.10.2"
 # asyncpg is a database interface library designed specifically for PostgreSQL
 # and Python/asyncio.
 # https://magicstack.github.io/asyncpg/current/
