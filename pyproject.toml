@@ -80,12 +80,12 @@ mypy = "^1.17.1"
 [tool.poetry.group.test.dependencies]
 pytest = "^8.4.1"
 # To prettify pytest output
-pytest-sugar = "^1.0.0"
+pytest-sugar = "^1.1.0"
 # Coverage.py is a tool for measuring code coverage of Python programs.
 # It monitors your program, noting which parts of the code have been executed,
 # then analyzes the source to identify code that could have been executed but was not.
 # https://coverage.readthedocs.io/en/latest/
-coverage = "^7.10.3"
+coverage = "^7.10.4"
 # asyncpg is a database interface library designed specifically for PostgreSQL
 # and Python/asyncio.
 # https://magicstack.github.io/asyncpg/current/
