@@ -531,14 +531,14 @@ ipython = {version = ">=7.31.1", markers = "python_version >= \"3.11\""}
 
 [[package]]
 name = "ipython"
-version = "9.5.0"
+version = "9.6.0"
 description = "IPython: Productive Interactive Computing"
 optional = false
 python-versions = ">=3.11"
 groups = ["dev"]
 files = [
-    {file = "ipython-9.5.0-py3-none-any.whl", hash = "sha256:88369ffa1d5817d609120daa523a6da06d02518e582347c29f8451732a9c5e72"},
-    {file = "ipython-9.5.0.tar.gz", hash = "sha256:129c44b941fe6d9b82d36fc7a7c18127ddb1d6f02f78f867f402e2e3adde3113"},
+    {file = "ipython-9.6.0-py3-none-any.whl", hash = "sha256:5f77efafc886d2f023442479b8149e7d86547ad0a979e9da9f045d252f648196"},
+    {file = "ipython-9.6.0.tar.gz", hash = "sha256:5603d6d5d356378be5043e69441a072b50a5b33b4503428c77b04cb8ce7bc731"},
 ]
 
 [package.dependencies]
@@ -557,10 +557,10 @@ typing_extensions = {version = ">=4.6", markers = "python_version < \"3.12\""}
 [package.extras]
 all = ["ipython[doc,matplotlib,test,test-extra]"]
 black = ["black"]
-doc = ["docrepr", "exceptiongroup", "intersphinx_registry", "ipykernel", "ipython[test]", "matplotlib", "setuptools (>=18.5)", "sphinx (>=1.3)", "sphinx-rtd-theme", "sphinx_toml (==0.0.4)", "typing_extensions"]
-matplotlib = ["matplotlib"]
+doc = ["docrepr", "exceptiongroup", "intersphinx_registry", "ipykernel", "ipython[matplotlib,test]", "setuptools (>=61.2)", "sphinx (>=1.3)", "sphinx-rtd-theme", "sphinx_toml (==0.0.4)", "typing_extensions"]
+matplotlib = ["matplotlib (>3.7)"]
 test = ["packaging", "pytest", "pytest-asyncio", "testpath"]
-test-extra = ["curio", "ipykernel", "ipython[test]", "jupyter_ai", "matplotlib (!=3.2.0)", "nbclient", "nbformat", "numpy (>=1.23)", "pandas", "trio"]
+test-extra = ["curio", "ipykernel", "ipython[matplotlib]", "ipython[test]", "jupyter_ai", "nbclient", "nbformat", "numpy (>=1.25)", "pandas (>2.0)", "trio"]
 
 [[package]]
 name = "ipython-pygments-lexers"
@@ -978,15 +978,15 @@ tests = ["pytest"]
 
 [[package]]
 name = "pydantic"
-version = "2.11.9"
+version = "2.11.10"
 description = "Data validation using Python type hints"
 optional = true
 python-versions = ">=3.9"
 groups = ["main"]
 markers = "extra == \"auto-schema\""
 files = [
-    {file = "pydantic-2.11.9-py3-none-any.whl", hash = "sha256:c42dd626f5cfc1c6950ce6205ea58c93efa406da65f479dcb4029d5934857da2"},
-    {file = "pydantic-2.11.9.tar.gz", hash = "sha256:6b8ffda597a14812a7975c90b82a8a2e777d9257aba3453f973acd3c032a18e2"},
+    {file = "pydantic-2.11.10-py3-none-any.whl", hash = "sha256:802a655709d49bd004c31e865ef37da30b540786a46bfce02333e0e24b5fe29a"},
+    {file = "pydantic-2.11.10.tar.gz", hash = "sha256:dc280f0982fbda6c38fada4e476dc0a4f3aeaf9c6ad4c28df68a666ec3c61423"},
 ]
 
 [package.dependencies]
@@ -1528,4 +1528,4 @@ testing = ["anyio"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "bfd0cbb3f06831cb163a145e940ac096a5b5a00743e509dc77b43d6308ec6a58"
+content-hash = "3bc19ad0a3a7ef119071d98b1019f22f0ffcae2aab5f51056e4254865b7807ad"
