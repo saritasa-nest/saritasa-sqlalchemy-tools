@@ -4,7 +4,7 @@ import pathlib
 
 import pytest
 
-import sqlalchemy
+import sqlalchemy.event
 import sqlalchemy.ext.asyncio
 
 from .. import session
@@ -37,10 +37,12 @@ def pytest_addoption(parser: pytest.Parser) -> None:
     parser.addini(
         "sqlalchemy_port",
         "Port for sqlalchemy.",
+        default=5432,
     )
     parser.addini(
         "sqlalchemy_database",
         "Name for database for sqlalchemy.",
+        default="saritasa-sqlalchemy-tools",
     )
     parser.addini(
         "sqlalchemy_schema",
@@ -49,6 +51,7 @@ def pytest_addoption(parser: pytest.Parser) -> None:
     parser.addini(
         "alembic_config",
         "Path to alembic config.",
+        default="alembic.ini",
     )
 
 
@@ -73,33 +76,30 @@ def database_url(request: pytest.FixtureRequest) -> str:
         },
     )
     driver = str(
-        request.config.inicfg.get("sqlalchemy_database_driver", ""),
+        request.config.getini("sqlalchemy_database_driver"),
     )
     if not driver:
         pytest.fail(
             reason="No driver for database is specified",
         )  # pragma: no cover
-    username = str(request.config.inicfg.get("sqlalchemy_username", ""))
+    username = str(request.config.getini("sqlalchemy_username"))
     if not username:
         pytest.fail(
             reason="No username for database is specified",
         )  # pragma: no cover
-    password = str(request.config.inicfg.get("sqlalchemy_password", ""))
+    password = str(request.config.getini("sqlalchemy_password"))
     if not password:
         pytest.fail(
             reason="No password for database is specified",
         )  # pragma: no cover
-    host = str(request.config.inicfg.get("sqlalchemy_host", ""))
+    host = str(request.config.getini("sqlalchemy_host"))
     if not host:
         pytest.fail(
             reason="No host for database is specified",
         )  # pragma: no cover
-    port = int(str(request.config.inicfg.get("sqlalchemy_port", 5432)))
+    port = int(str(request.config.getini("sqlalchemy_port")))
     database = str(
-        request.config.inicfg.get(
-            "sqlalchemy_database",
-            "saritasa-sqlalchemy-tools",
-        ),
+        request.config.getini("sqlalchemy_database"),
     )
     return sqlalchemy.engine.URL(
         drivername=driver,
@@ -139,7 +139,7 @@ def alembic_database_setup(
 ) -> bool:
     """Set up database via alembic."""
     alembic_config_path = str(
-        request.config.inicfg.get("alembic_config", "alembic.ini"),
+        request.config.getini("alembic_config"),
     )
     if not pathlib.Path(alembic_config_path).exists():
         return False  # pragma: no cover
@@ -181,7 +181,7 @@ async def sqlalchemy_engine(
         database,
         echo=sqlalchemy_echo,
     )
-    db_schema = str(request.config.inicfg.get("sqlalchemy_schema", ""))
+    db_schema = str(request.config.getini("sqlalchemy_schema"))
     if db_schema:
         sqlalchemy.event.listens_for(
             target=engine.sync_engine,
