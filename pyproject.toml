@@ -92,7 +92,7 @@ coverage = "^7.13.4"
 asyncpg = "^0.31.0"
 # Alembic autogenerate support for creation, alteration and deletion of enums
 # https://github.com/Pogchamp-company/alembic-postgresql-enum
-alembic-postgresql-enum = "^1.9.0"
+alembic-postgresql-enum = "^1.10.0"
 
 [build-system]
 requires = ["poetry-core"]
