@@ -1481,19 +1481,19 @@ jupyter = ["ipywidgets (>=7.5.1,<9)"]
 
 [[package]]
 name = "saritasa-invocations"
-version = "1.12.1"
+version = "1.13.0"
 description = "Collection of invoke commands used by Saritasa"
 optional = false
 python-versions = ">=3.10"
 groups = ["dev"]
 files = [
-    {file = "saritasa_invocations-1.12.1-py3-none-any.whl", hash = "sha256:8d3389260ec6ec80de71d3f5a6d0593fff6bd0c8972adc5036a610c6e182e973"},
-    {file = "saritasa_invocations-1.12.1.tar.gz", hash = "sha256:ad3cb61852c467e528de0afd629e93de4b1983c47eb289638a8983fb8dba96c4"},
+    {file = "saritasa_invocations-1.13.0-py3-none-any.whl", hash = "sha256:11017f287aafc86c4c449475c7204b53bc51930f4295b6ff76262bcdce45bb3d"},
+    {file = "saritasa_invocations-1.13.0.tar.gz", hash = "sha256:f0cee1b7dee29f4eb624f043862e0d46d2ef393bbe8d35f0fb147a616b5e50e0"},
 ]
 
 [package.dependencies]
-invoke = ">=2,<4"
-rich = ">=13,<16"
+invoke = ">=2"
+rich = ">=13"
 
 [package.extras]
 env-settings = ["python-decouple (>=3)"]
